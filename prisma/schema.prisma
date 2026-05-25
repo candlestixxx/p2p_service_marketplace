@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  PROVIDER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  services             Service[]
+  availabilities       Availability[]
+  clientAppointments   Appointment[]  @relation("ClientAppointments")
+  providerAppointments Appointment[]  @relation("ProviderAppointments")
+}
+
+model Service {
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  price            Float
+  duration_minutes Int
+  providerId       String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  provider     User          @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+}
+
+model Availability {
+  id          String   @id @default(cuid())
+  day_of_week Int      // 0 = Sunday, 1 = Monday, etc.
+  start_time  String   // e.g., "09:00"
+  end_time    String   // e.g., "17:00"
+  providerId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  provider User @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id         String            @id @default(cuid())
+  clientId   String
+  providerId String
+  serviceId  String
+  start_time DateTime
+  end_time   DateTime
+  status     AppointmentStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  // Relations
+  client   User    @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+  provider User    @relation("ProviderAppointments", fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
