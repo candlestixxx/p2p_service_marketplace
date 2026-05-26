@@ -4,11 +4,15 @@ import { signIn, signOut } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { AuthError } from "next-auth"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 export async function login(formData: FormData) {
   try {
     await signIn("credentials", formData)
   } catch (error) {
+    if (isRedirectError(error)) {
+        throw error;
+    }
     if (error instanceof AuthError) {
       return { error: error.cause?.err?.message || "Invalid credentials." }
     }
@@ -49,10 +53,17 @@ export async function register(formData: FormData) {
     },
   })
 
-  // Automatically sign them in
-  await signIn("credentials", {
-    email,
-    password,
-    redirect: false,
-  })
+  try {
+      // Automatically sign them in
+      await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+  } catch (error) {
+     if (isRedirectError(error)) {
+        throw error;
+     }
+  }
+  return { success: true }
 }
