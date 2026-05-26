@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { sendBookingConfirmationSMS } from "@/lib/notifications";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -23,14 +24,28 @@ export async function POST(req: Request) {
     const metadata = session?.metadata as Record<string, string>;
 
     if (metadata?.appointmentId) {
-      await prisma.appointment.update({
+      const updatedApt = await prisma.appointment.update({
         where: {
           id: metadata.appointmentId,
         },
         data: {
           status: "CONFIRMED",
         },
+        include: {
+          client: true,
+          service: true,
+          provider: true,
+        }
       });
+
+      // Send Mock SMS Notification
+      // Note: User model does not currently have a phone number, so we use a dummy string
+      await sendBookingConfirmationSMS(
+        "555-0199", // mock client phone number
+        updatedApt.service.title,
+        updatedApt.provider.name || "Provider",
+        updatedApt.start_time
+      );
     }
   }
 
