@@ -1,0 +1,163 @@
+"use server";
+
+import { stripe } from "@/lib/stripe";
+import { prisma } from "@/lib/prisma";
+import { headers } from "next/headers";
+import { getClient } from "./booking";
+import { getProvider } from "./provider";
+
+export async function createCheckoutSession(serviceId: string, slotStart: Date) {
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId },
+    include: { provider: true },
+  });
+
+  if (!service) throw new Error("Service not found");
+
+  if (!service.provider.stripeConnectLinked || !service.provider.stripeAccountId) {
+    throw new Error("This provider cannot currently accept payments.");
+  }
+
+  const client = await getClient();
+  const endTime = new Date(slotStart.getTime() + service.duration_minutes * 60000);
+
+  // Re-verify overlap just in case
+  const overlap = await prisma.appointment.findFirst({
+    where: {
+      providerId: service.providerId,
+      status: { not: "CANCELLED" },
+      OR: [
+        { start_time: { lt: endTime }, end_time: { gt: slotStart } }
+      ]
+    }
+  });
+
+  if (overlap) {
+    throw new Error("Time slot is no longer available.");
+  }
+
+  // Create PENDING appointment
+  const appointment = await prisma.appointment.create({
+    data: {
+      clientId: client.id,
+      providerId: service.providerId,
+      serviceId: service.id,
+      start_time: slotStart,
+      end_time: endTime,
+      status: "PENDING",
+    },
+  });
+
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
+
+  const amountCents = Math.round(service.price * 100);
+  const platformFee = Math.round(amountCents * 0.10); // 10% fee
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `${service.title} with ${service.provider.name}`,
+              description: `Appointment at ${slotStart.toLocaleString()}`,
+            },
+            unit_amount: amountCents,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      payment_intent_data: {
+        application_fee_amount: platformFee,
+        transfer_data: {
+          destination: service.provider.stripeAccountId,
+        },
+      },
+      success_url: `${baseUrl}/services/${serviceId}/book?success=true`,
+      cancel_url: `${baseUrl}/services/${serviceId}/book?canceled=true`,
+      metadata: {
+        appointmentId: appointment.id,
+      },
+    });
+
+    return { url: session.url };
+  } catch (error) {
+    // Revert appointment creation on Stripe error
+    await prisma.appointment.delete({ where: { id: appointment.id } });
+    throw error;
+  }
+}
+
+export async function createStripeConnectAccount() {
+  const provider = await getProvider();
+
+  if (provider.stripeAccountId) {
+    return provider.stripeAccountId;
+  }
+
+  const account = await stripe.accounts.create({
+    type: "express",
+    email: provider.email,
+  });
+
+  await prisma.user.update({
+    where: { id: provider.id },
+    data: { stripeAccountId: account.id },
+  });
+
+  return account.id;
+}
+
+export async function createStripeConnectLink() {
+  const provider = await getProvider();
+
+  let accountId = provider.stripeAccountId;
+  if (!accountId) {
+    accountId = await createStripeConnectAccount();
+  }
+
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
+
+  const accountLink = await stripe.accountLinks.create({
+    account: accountId,
+    refresh_url: `${baseUrl}/api/stripe/refresh`,
+    return_url: `${baseUrl}/api/stripe/return`,
+    type: "account_onboarding",
+  });
+
+  return accountLink.url;
+}
+
+export async function checkStripeConnectStatus() {
+  try {
+     const provider = await getProvider();
+
+     if (!provider.stripeAccountId) {
+       return false;
+     }
+
+     const account = await stripe.accounts.retrieve(provider.stripeAccountId);
+
+     const isLinked = account.details_submitted && account.charges_enabled;
+
+     if (isLinked !== provider.stripeConnectLinked) {
+       await prisma.user.update({
+         where: { id: provider.id },
+         data: { stripeConnectLinked: isLinked },
+       });
+     }
+
+     return isLinked;
+  } catch(e) {
+     return false;
+  }
+}
