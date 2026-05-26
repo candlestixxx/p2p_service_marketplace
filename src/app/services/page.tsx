@@ -25,9 +25,15 @@ export default async function MarketplacePage({
           ServiceHub
         </Link>
         <div className="ml-auto flex items-center gap-4">
-          <Link href="/dashboard/provider" className="text-sm font-medium hover:underline underline-offset-4">
-            Provider Dashboard
-          </Link>
+          {session?.user?.role === "PROVIDER" ? (
+            <Link href="/dashboard/provider" className="text-sm font-medium hover:underline underline-offset-4">
+              Provider Dashboard
+            </Link>
+          ) : session?.user?.role === "CLIENT" ? (
+            <Link href="/dashboard/client" className="text-sm font-medium hover:underline underline-offset-4">
+              Client Dashboard
+            </Link>
+          ) : null}
           {session ? <LogoutButton /> : <LoginButton />}
         </div>
       </header>

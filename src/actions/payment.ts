@@ -79,7 +79,7 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
           destination: service.provider.stripeAccountId,
         },
       },
-      success_url: `${baseUrl}/services/${serviceId}/book?success=true`,
+      success_url: `${baseUrl}/services/${serviceId}/success`,
       cancel_url: `${baseUrl}/services/${serviceId}/book?canceled=true`,
       metadata: {
         appointmentId: appointment.id,
