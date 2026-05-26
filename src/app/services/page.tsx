@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { auth } from "@/auth";
 import { LoginButton, LogoutButton } from "@/components/auth-buttons";
 
@@ -16,7 +16,18 @@ export default async function MarketplacePage({
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === "string" ? resolvedParams.q : "";
   const loc = typeof resolvedParams.loc === "string" ? resolvedParams.loc : "";
-  const services = await getAllServices(q, loc);
+  const page = typeof resolvedParams.page === "string" ? parseInt(resolvedParams.page, 10) : 1;
+
+  const { services, totalPages } = await getAllServices(q, loc, page);
+
+  // Helper to maintain other search params when changing pages
+  const createPageUrl = (newPage: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (loc) params.set("loc", loc);
+    params.set("page", newPage.toString());
+    return `/services?${params.toString()}`;
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -81,7 +92,7 @@ export default async function MarketplacePage({
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-8">
             {services.length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground">
-                No services found in your area. Try adjusting your search.
+                No services found matching your criteria.
               </div>
             ) : (
               services.map((service) => (
@@ -115,6 +126,35 @@ export default async function MarketplacePage({
               ))
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 pt-8">
+              <Button
+                variant="outline"
+                asChild
+                disabled={page <= 1}
+                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+              >
+                <Link href={createPageUrl(page - 1)}>
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                </Link>
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                asChild
+                disabled={page >= totalPages}
+                className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+              >
+                <Link href={createPageUrl(page + 1)}>
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          )}
+
         </div>
       </main>
     </div>
