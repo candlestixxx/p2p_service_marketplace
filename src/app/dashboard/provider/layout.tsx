@@ -21,6 +21,12 @@ export default async function ProviderLayout({
             ServiceHub Provider
           </Link>
           <Link
+            href="/dashboard/provider/profile"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Profile
+          </Link>
+          <Link
             href="/dashboard/provider/services"
             className="text-muted-foreground transition-colors hover:text-foreground"
           >

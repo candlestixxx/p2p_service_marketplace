@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { auth } from "@/auth";
 import { LoginButton, LogoutButton } from "@/components/auth-buttons";
 
@@ -15,7 +15,8 @@ export default async function MarketplacePage({
   const session = await auth();
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === "string" ? resolvedParams.q : "";
-  const services = await getAllServices(q);
+  const loc = typeof resolvedParams.loc === "string" ? resolvedParams.loc : "";
+  const services = await getAllServices(q, loc);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -48,17 +49,30 @@ export default async function MarketplacePage({
             </p>
           </div>
 
-          <div className="mx-auto max-w-2xl">
-            <form className="relative flex items-center w-full" action="/services">
-              <Search className="absolute left-3 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="search"
-                name="q"
-                placeholder="Search for services or providers..."
-                className="w-full rounded-full bg-background pl-10 pr-4 py-6 text-lg shadow-sm"
-                defaultValue={q}
-              />
-              <Button type="submit" className="absolute right-2 rounded-full px-6">
+          <div className="mx-auto max-w-3xl bg-background rounded-2xl shadow-sm border p-2">
+            <form className="flex flex-col sm:flex-row items-center gap-2" action="/services">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="search"
+                  name="q"
+                  placeholder="What service do you need?"
+                  className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent pl-10 text-base"
+                  defaultValue={q}
+                />
+              </div>
+              <div className="hidden sm:block w-[1px] h-8 bg-border"></div>
+              <div className="relative flex-1 w-full border-t sm:border-t-0">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="search"
+                  name="loc"
+                  placeholder="City or Zip Code"
+                  className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent pl-10 text-base"
+                  defaultValue={loc}
+                />
+              </div>
+              <Button type="submit" className="w-full sm:w-auto rounded-xl px-8 mt-2 sm:mt-0">
                 Search
               </Button>
             </form>
@@ -67,14 +81,19 @@ export default async function MarketplacePage({
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-8">
             {services.length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground">
-                No services found. Try adjusting your search.
+                No services found in your area. Try adjusting your search.
               </div>
             ) : (
               services.map((service) => (
                 <Card key={service.id} className="flex flex-col overflow-hidden transition-all hover:shadow-md">
                   <CardHeader className="p-4 pb-0">
-                    <CardDescription className="font-semibold text-primary">
-                      {service.provider.name || "Unknown Provider"}
+                    <CardDescription className="font-semibold text-primary flex items-center justify-between">
+                      <span className="truncate mr-2">{service.provider.name || "Unknown Provider"}</span>
+                      {service.provider.city && (
+                        <span className="text-xs font-normal text-muted-foreground truncate shrink-0">
+                          {service.provider.city}, {service.provider.state}
+                        </span>
+                      )}
                     </CardDescription>
                     <CardTitle className="line-clamp-1">{service.title}</CardTitle>
                   </CardHeader>

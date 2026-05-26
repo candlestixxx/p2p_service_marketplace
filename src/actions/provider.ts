@@ -99,3 +99,18 @@ export async function getProviderAppointments() {
      return [];
   }
 }
+
+export async function updateProfile(data: { city: string; state: string; zip_code: string }) {
+  const provider = await getProvider();
+
+  await prisma.user.update({
+    where: { id: provider.id },
+    data: {
+      city: data.city,
+      state: data.state,
+      zip_code: data.zip_code,
+    }
+  });
+
+  revalidatePath("/dashboard/provider/profile");
+}

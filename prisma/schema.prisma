@@ -33,6 +33,9 @@ model User {
   password String?
   stripeAccountId String?
   stripeConnectLinked Boolean @default(false)
+  city String?
+  state String?
+  zip_code String?
 
   // Relations
   services             Service[]
