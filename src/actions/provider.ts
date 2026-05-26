@@ -83,3 +83,18 @@ export async function getProviderAvailability() {
      return [];
   }
 }
+
+export async function getProviderAppointments() {
+  try {
+     const provider = await getProvider();
+     return prisma.appointment.findMany({
+       where: { providerId: provider.id },
+       include: {
+         service: true,
+         client: true,
+       },
+     });
+  } catch(e) {
+     return [];
+  }
+}
