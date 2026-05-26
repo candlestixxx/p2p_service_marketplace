@@ -1,20 +1,21 @@
 # Session Handoff & Architecture Map
 
 ## Summary
-In this session, the "ServiceHub" application (an Uber for services marketplace) was initialized from scratch and built up to a Minimum Viable Product using the defined stack: Next.js 15, Prisma ORM, PostgreSQL, TailwindCSS, Stripe, and shadcn/ui.
+In this session, the "ServiceHub" application (an Uber for services marketplace) was initialized from scratch and built up to a Minimum Viable Product using the defined stack: Next.js 15, Prisma ORM, PostgreSQL, TailwindCSS, Stripe, and shadcn/ui. Furthermore, NextAuth was integrated to securely manage sessions and login credentials for Clients and Providers. Standard project documentation tracking has been enabled.
 
 ## Completed Work
-*   **Database Setup**: Complete schema defined for `User`, `Service`, `Availability`, and `Appointment`.
+*   **Database Setup**: Complete schema defined for `User`, `Service`, `Availability`, and `Appointment`, augmented by standard NextAuth adapter models (`Account`, `Session`, `VerificationToken`).
+*   **Authentication**: Integrated NextAuth (Auth.js v5) providing `/login` and `/register` flows using `bcryptjs` for credentials logic. The global layout uses `auth()` to contextually switch navigation options.
 *   **Provider Dashboard**: Functional pages at `/dashboard/provider/services` and `/dashboard/provider/availability` utilizing Server Actions for data mutation.
 *   **Marketplace Hub**: Discovery page built at `/services` enabling client search.
 *   **Booking Engine**: Logic implemented in `src/actions/booking.ts` and `src/app/services/[id]/book/page.tsx` for dynamic slot generation factoring in duration and existing appointment overlaps.
-*   **Monetization / Stripe**: Payment processing implemented. Booking redirects the user to a Stripe Checkout Session via `src/actions/payment.ts`. A webhook exists at `/api/webhook/stripe/route.ts` to listen for `checkout.session.completed` events and mark `PENDING` appointments as `CONFIRMED`.
-*   **Code Review Fixes**: Timezones for the date calculation in the booking engine were adjusted to use UTC to avoid off-by-one errors. Types were enforced, and `@prisma/client` moved to standard dependencies.
+*   **Monetization / Stripe**: Payment processing implemented using Stripe Connect. Providers securely link an Express account. Booking redirects the user to a Stripe Checkout Session via `src/actions/payment.ts`, applying a platform fee. A webhook handles the confirmation of `PENDING` appointments.
+*   **Documentation Setup**: Centralized documentation strategy enabled per AI developer protocols. Ensure that `VISION.md`, `MEMORY.md`, `DEPLOY.md`, `IDEAS.md`, `CHANGELOG.md`, and `VERSION.md` are updated concurrently.
 
 ## Pending Tasks (Next Session)
-*   Integrate full User Authentication (e.g., Auth.js or Clerk) to replace the `getOrCreateDemoClient` and `getOrCreateDemoProvider` mock functions.
-*   The Stripe Integration works for the logic, but it uses the marketplace owner's account completely. It needs to be transitioned to Stripe Connect to appropriately partition funds using `stripeAccount` properties on Checkout Sessions if we want to retain a platform fee and pass the rest to the service provider.
 *   Refine the frontend visual components, especially the confirmation states.
+*   Implement webhooks for Twilio or Resend to send SMS/Email notifications for booking confirmations.
+*   Add a visual calendar component (like react-big-calendar) to the provider dashboard for easier schedule visualization.
 *   Enhance testing (add Jest / React Testing Library coverage).
 
 ## System State
