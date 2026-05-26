@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
-import { sendBookingConfirmationSMS } from "@/lib/notifications";
+import { sendBookingConfirmationNotifications } from "@/lib/notifications";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -38,9 +38,9 @@ export async function POST(req: Request) {
         }
       });
 
-      // Send Mock SMS Notification
-      // Note: User model does not currently have a phone number, so we use a dummy string
-      await sendBookingConfirmationSMS(
+      // Send Mock SMS & Email Notification
+      await sendBookingConfirmationNotifications(
+        updatedApt.client.email,
         "555-0199", // mock client phone number
         updatedApt.service.title,
         updatedApt.provider.name || "Provider",
