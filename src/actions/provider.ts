@@ -26,6 +26,7 @@ export async function addService(data: {
   description: string;
   price: number;
   duration_minutes: number;
+  buffer_minutes: number;
 }) {
   const provider = await getProvider();
 

@@ -43,27 +43,37 @@ export async function getProviderAvailabilityForService(serviceId: string, dateS
   const endOfDay = new Date(targetDate);
   endOfDay.setUTCHours(23, 59, 59, 999);
 
+  // Include the service associated with existing appointments to get their buffer_minutes
   const existingAppointments = await prisma.appointment.findMany({
     where: {
       providerId: service.providerId,
       start_time: { gte: startOfDay, lt: endOfDay },
       status: { not: "CANCELLED" },
     },
+    include: {
+      service: true,
+    }
   });
 
   const slots: { start: Date; end: Date }[] = [];
   const serviceDurationMs = service.duration_minutes * 60 * 1000;
+  // Note: the buffer for the NEW appointment is also added
+  const newAppointmentBufferMs = service.buffer_minutes * 60 * 1000;
   const currentSlotStart = new Date(dayStart);
 
   while (currentSlotStart.getTime() + serviceDurationMs <= dayEnd.getTime()) {
     const currentSlotEnd = new Date(currentSlotStart.getTime() + serviceDurationMs);
+    const currentSlotWithBufferEnd = new Date(currentSlotEnd.getTime() + newAppointmentBufferMs);
 
-    // Check for overlap with existing appointments
-    const hasOverlap = existingAppointments.some((apt: { start_time: Date; end_time: Date; }) => {
+    // Check for overlap with existing appointments, factoring in the existing appointment's buffer
+    const hasOverlap = existingAppointments.some((apt: { start_time: Date; end_time: Date; service: { buffer_minutes: number } }) => {
+      const aptBufferMs = apt.service.buffer_minutes * 60 * 1000;
+      const aptEndWithBuffer = new Date(new Date(apt.end_time).getTime() + aptBufferMs);
+
       return (
-        (currentSlotStart >= apt.start_time && currentSlotStart < apt.end_time) ||
-        (currentSlotEnd > apt.start_time && currentSlotEnd <= apt.end_time) ||
-        (currentSlotStart <= apt.start_time && currentSlotEnd >= apt.end_time)
+        (currentSlotStart >= apt.start_time && currentSlotStart < aptEndWithBuffer) ||
+        (currentSlotWithBufferEnd > apt.start_time && currentSlotWithBufferEnd <= aptEndWithBuffer) ||
+        (currentSlotStart <= apt.start_time && currentSlotWithBufferEnd >= aptEndWithBuffer)
       );
     });
 
@@ -106,15 +116,23 @@ export async function bookAppointment(serviceId: string, startTime: Date) {
 
   const endTime = new Date(startTime.getTime() + service.duration_minutes * 60000);
 
-  // Re-verify overlap just in case
-  const overlap = await prisma.appointment.findFirst({
+  // Calculate new appointment end time including buffer for overlap checking
+  const endTimeWithBuffer = new Date(endTime.getTime() + service.buffer_minutes * 60000);
+
+  // We need to fetch appointments overlapping to check their custom buffers as well
+  const existingApts = await prisma.appointment.findMany({
     where: {
       providerId: service.providerId,
       status: { not: "CANCELLED" },
-      OR: [
-        { start_time: { lt: endTime }, end_time: { gt: startTime } }
-      ]
-    }
+      start_time: { lt: endTimeWithBuffer },
+    },
+    include: { service: true }
+  });
+
+  const overlap = existingApts.some((apt) => {
+      const aptBufferMs = apt.service.buffer_minutes * 60000;
+      const aptEndWithBuffer = new Date(apt.end_time.getTime() + aptBufferMs);
+      return apt.start_time < endTimeWithBuffer && aptEndWithBuffer > startTime;
   });
 
   if (overlap) {

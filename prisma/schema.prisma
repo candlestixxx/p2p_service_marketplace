@@ -47,6 +47,7 @@ model Service {
   description      String?
   price            Float
   duration_minutes Int
+  buffer_minutes   Int      @default(0)
   providerId       String
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

@@ -30,6 +30,9 @@ const formSchema = z.object({
   duration_minutes: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 5, {
     message: "Duration must be at least 5 minutes.",
   }),
+  buffer_minutes: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+    message: "Buffer time cannot be negative.",
+  }),
 });
 
 export default function ServicesPage() {
@@ -42,6 +45,7 @@ export default function ServicesPage() {
       description: "",
       price: "0",
       duration_minutes: "30",
+      buffer_minutes: "0",
     },
   });
 
@@ -61,6 +65,7 @@ export default function ServicesPage() {
         description: values.description || "",
         price: Number(values.price),
         duration_minutes: Number(values.duration_minutes),
+        buffer_minutes: Number(values.buffer_minutes),
       });
       toast.success("Service added successfully");
       form.reset();
@@ -108,7 +113,7 @@ export default function ServicesPage() {
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="price"
@@ -128,6 +133,19 @@ export default function ServicesPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Duration (Minutes)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buffer_minutes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Buffer (Minutes)</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -160,7 +178,9 @@ export default function ServicesPage() {
                   </div>
                   <div className="text-right">
                     <div className="font-medium">${service.price}</div>
-                    <div className="text-sm text-muted-foreground">{service.duration_minutes} mins</div>
+                    <div className="text-sm text-muted-foreground">
+                      {service.duration_minutes} mins (+{service.buffer_minutes} min buffer)
+                    </div>
                   </div>
                 </div>
               ))}
