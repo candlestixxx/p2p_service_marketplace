@@ -44,6 +44,13 @@ export default function CalendarPage() {
       }
     }
     fetchAppointments();
+
+    // Lightweight polling for real-time calendar updates
+    const interval = setInterval(() => {
+      fetchAppointments();
+    }, 15000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (

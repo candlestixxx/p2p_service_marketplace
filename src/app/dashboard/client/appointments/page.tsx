@@ -33,6 +33,13 @@ export default function ClientAppointmentsPage() {
 
   useEffect(() => {
     loadAppointments();
+
+    // Lightweight polling to see if a provider confirmed/cancelled an appointment
+    const interval = setInterval(() => {
+      loadAppointments();
+    }, 15000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleCancel = async (appointmentId: string) => {

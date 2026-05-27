@@ -71,3 +71,7 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 - Checked the `react-big-calendar` component inside the Provider dashboard (`src/app/dashboard/provider/calendar/page.tsx`).
 - It correctly fetched from the Prisma database using the date-fns localizer.
 - Enhanced it to display custom background colors matching the actual `Appointment` status (`red` for Cancelled, `yellow` for Pending, `blue` for Confirmed).
+
+## Final Implementation Note (Real-time Polling)
+- Addressed the final UI/UX Idea: Real-time dashboard updates.
+- Rather than implementing heavy, persistent-connection Websockets (which scale poorly on serverless platforms like Vercel without paid external services like Pusher), a lightweight 15-second polling interval was implemented across the Provider and Client dashboards. This achieves the exact same UX requirement—automatically surfacing new bookings or status changes without requiring the user to refresh the page.

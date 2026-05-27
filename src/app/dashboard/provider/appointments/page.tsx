@@ -29,6 +29,13 @@ export default function ProviderAppointmentsPage() {
 
   useEffect(() => {
     loadAppointments();
+
+    // Lightweight polling for real-time updates (every 15 seconds)
+    const interval = setInterval(() => {
+      loadAppointments();
+    }, 15000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleUpdateStatus = async (appointmentId: string, status: "CONFIRMED" | "CANCELLED") => {

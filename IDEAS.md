@@ -25,4 +25,4 @@ Rather than building separate OAuth 2.0 flows for Google, Microsoft, and Apple, 
 - **Cal.com Open Source:** Fork and integrate `cal.com`'s core scheduling engine into our monorepo.
 
 ## UI/UX Polish
-- **Websockets:** Implement Socket.io or Supabase Realtime to update the marketplace listings and dashboards the exact second a slot is booked, removing the need for page refreshes.
+- **Websockets / Polling:** [IMPLEMENTED] A lightweight 15-second polling interval has been implemented on all Dashboards. This is the optimal architecture for Vercel/Serverless deployments, providing near real-time updates without the heavy persistent-connection costs of raw Websockets.
