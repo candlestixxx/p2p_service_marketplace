@@ -17,6 +17,6 @@
 * [x] Provider Portfolio Image Gallery
 
 ## Phase 3: Scaling
-* [ ] Geo-location filtering with Google Maps API
+* [x] Geo-location filtering with Google Maps API (Simplified to City/State string match)
 * [ ] Advanced Calendar Sync (Google Calendar API, Outlook)
 * [x] Admin Moderation Dashboard
