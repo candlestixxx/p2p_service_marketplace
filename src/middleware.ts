@@ -23,6 +23,20 @@ export default middleware((req) => {
     return;
   }
 
+  // Role-based route protection
+  if (isLoggedIn && isDashboardRoute) {
+    const role = req.auth?.user?.role;
+    if (nextUrl.pathname.startsWith("/dashboard/admin") && role !== "ADMIN") {
+      return Response.redirect(new URL("/services", nextUrl));
+    }
+    if (nextUrl.pathname.startsWith("/dashboard/provider") && role !== "PROVIDER") {
+      return Response.redirect(new URL("/services", nextUrl));
+    }
+    if (nextUrl.pathname.startsWith("/dashboard/client") && role !== "CLIENT") {
+      return Response.redirect(new URL("/services", nextUrl));
+    }
+  }
+
   if (!isLoggedIn && isDashboardRoute) {
     let callbackUrl = nextUrl.pathname;
     if (nextUrl.search) {

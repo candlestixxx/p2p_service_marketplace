@@ -56,3 +56,9 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 - Overhauled the Provider Profile UI (`src/app/dashboard/provider/profile/page.tsx`) utilizing `react-hook-form`'s `useFieldArray` to allow providers to dynamically add, edit, or remove an arbitrary number of portfolio image URLs.
 - Enhanced the Marketplace Booking UI (`src/app/services/[id]/book/page.tsx`) to display the provider's avatar and render a CSS grid gallery for their portfolio.
 - Verified type safety (removed explicit `any`), ran tests, and successfully completed the production build.
+
+## Last Actions Performed (Jules Context - Admin Moderation)
+- Added `ADMIN` to the Prisma `Role` enum and created a database migration to support platform moderators.
+- Created `src/actions/admin.ts` containing strict, role-gated server actions to fetch, read, and delete Users and Services.
+- Created an `Admin Dashboard` at `/dashboard/admin/page.tsx` displaying active users, providers, and their services, along with quick-delete moderation tools.
+- Modified `src/middleware.ts` to strictly enforce role bounds on all dashboard variants (Client, Provider, Admin).
