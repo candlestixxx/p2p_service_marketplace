@@ -42,3 +42,9 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 - **UI Component:** Built `RescheduleDialog`, which mirrors the booking calendar modal but starts by showing availability for a specific service on demand.
 - Updated the `TODO.md` to reflect the completed short-term feature "Create an Edit Appointment flow".
 - **Cleanup:** Addressed a minor Stripe SDK API version hallucination identified during code review.
+
+## Last Actions Performed (Jules Context - Notification SDK Integration)
+- Integrated `twilio` and `resend` SDKs to replace the mock notification logs.
+- Wrote fallback checks: if API keys are missing in the environment, the system gracefully degrades to logging mock output rather than breaking the application checkout flow.
+- Reverted the Stripe API version back to the original `2026-04-22.dahlia` version string to fix a TypeScript SDK compilation error during build (the SDK was updated specifically for that timeline's types).
+- Updated `TODO.md` and `ROADMAP.md` tracking webhooks integration.

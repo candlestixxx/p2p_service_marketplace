@@ -11,9 +11,9 @@
 * [x] NextAuth Role-Based Authentication
 
 ## Phase 2: Engagement
-* [ ] Implement Twilio SMS Webhooks
-* [ ] Implement Resend Email Webhooks
-* [ ] Provider Review & Rating System
+* [x] Implement Twilio SMS Webhooks
+* [x] Implement Resend Email Webhooks
+* [x] Provider Review & Rating System
 * [ ] Provider Portfolio Image Gallery
 
 ## Phase 3: Scaling

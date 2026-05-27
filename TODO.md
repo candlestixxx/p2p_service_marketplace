@@ -6,6 +6,6 @@
 * [x] Replace dummy Stripe fallback keys (`sk_test_12345`) with a rigorous environment check that throws an error if missing during production builds.
 
 ## Short-term Features
-* [ ] Wire up real Twilio account SID/Token to the mock notification service.
+* [x] Wire up real Twilio account SID/Token to the mock notification service.
 * [x] Implement basic pagination on the Marketplace discovery hub.
 * [x] Create an "Edit Appointment" flow allowing clients to request a reschedule.
