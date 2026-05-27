@@ -7,5 +7,5 @@
 
 ## Short-term Features
 * [ ] Wire up real Twilio account SID/Token to the mock notification service.
-* [ ] Implement basic pagination on the Marketplace discovery hub.
+* [x] Implement basic pagination on the Marketplace discovery hub.
 * [ ] Create an "Edit Appointment" flow allowing clients to request a reschedule.
