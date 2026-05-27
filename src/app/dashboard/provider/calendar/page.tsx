@@ -34,6 +34,7 @@ export default function CalendarPage() {
           title: `${apt.service.title} - ${apt.client.name}`,
           start: new Date(apt.start_time),
           end: new Date(apt.end_time),
+          resource: apt.status,
         }));
         setEvents(mappedEvents);
       } catch (_error) {
@@ -65,6 +66,12 @@ export default function CalendarPage() {
             style={{ height: "100%", width: "100%" }}
             views={["month", "week", "day"]}
             defaultView="week"
+            eventPropGetter={(event: Event & { resource?: string }) => {
+              let backgroundColor = '#3174ad'; // default blue (CONFIRMED)
+              if (event.resource === 'CANCELLED') backgroundColor = '#ef4444'; // red
+              if (event.resource === 'PENDING') backgroundColor = '#eab308'; // yellow
+              return { style: { backgroundColor } };
+            }}
           />
         )}
       </CardContent>

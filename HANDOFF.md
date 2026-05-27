@@ -66,3 +66,8 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 ## Final Implementation Note (Calendar Synching via ICS)
 - To unblock immediate provider needs for external calendar syncing without heavy API dependencies, a dynamic `.ics` export route was implemented at `/api/appointments/[id]/ics`.
 - Both Client and Provider dashboards now feature native "Add to Calendar" buttons for `CONFIRMED` appointments that serve these generated ICS files.
+
+## Final Implementation Note (Visual Calendar Component)
+- Checked the `react-big-calendar` component inside the Provider dashboard (`src/app/dashboard/provider/calendar/page.tsx`).
+- It correctly fetched from the Prisma database using the date-fns localizer.
+- Enhanced it to display custom background colors matching the actual `Appointment` status (`red` for Cancelled, `yellow` for Pending, `blue` for Confirmed).
