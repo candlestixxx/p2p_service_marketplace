@@ -35,3 +35,10 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 ## Ready For Successor Model
 - The MVP features are fundamentally COMPLETE and rock-solid (Auth, Bookings, Stripe, Subscriptions, Profiles, Search, Pagination, Geolocation, Reviews).
 - The next step is scaling: integrating real APIs (Twilio, Resend, Google Maps for geocoding) or beginning beta testing.
+
+## Last Actions Performed (Jules Context - Reschedule Feature)
+- Developed an `Appointment Reschedule` feature natively for the Client Dashboard.
+- **Server Action:** Created `rescheduleAppointment` in `src/actions/client.ts` to update appointment start and end times, safely ignoring its own current record when checking for new overlap conflicts.
+- **UI Component:** Built `RescheduleDialog`, which mirrors the booking calendar modal but starts by showing availability for a specific service on demand.
+- Updated the `TODO.md` to reflect the completed short-term feature "Create an Edit Appointment flow".
+- **Cleanup:** Addressed a minor Stripe SDK API version hallucination identified during code review.

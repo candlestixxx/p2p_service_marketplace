@@ -103,3 +103,58 @@ export async function createReview(appointmentId: string, rating: number, commen
   revalidatePath("/services");
   revalidatePath(`/services/${appointment.serviceId}/book`);
 }
+
+export async function rescheduleAppointment(appointmentId: string, newStartTime: Date) {
+  const client = await getClient();
+
+  const appointment = await prisma.appointment.findUnique({
+    where: { id: appointmentId },
+    include: { service: true }
+  });
+
+  if (!appointment) throw new Error("Appointment not found");
+  if (appointment.clientId !== client.id) throw new Error("Unauthorized");
+  if (appointment.status === "CANCELLED") throw new Error("Cannot reschedule a cancelled appointment");
+
+  const service = appointment.service;
+  const newEndTime = new Date(newStartTime.getTime() + service.duration_minutes * 60000);
+  const newEndTimeWithBuffer = new Date(newEndTime.getTime() + service.buffer_minutes * 60000);
+
+  // Check for overlaps, EXCLUDING the current appointment we are rescheduling
+  const startOfDay = new Date(newStartTime);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const endOfDay = new Date(newStartTime);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  const existingApts = await prisma.appointment.findMany({
+    where: {
+      providerId: appointment.providerId,
+      status: { not: "CANCELLED" },
+      start_time: { gte: startOfDay, lt: endOfDay },
+      id: { not: appointmentId } // Exclude self
+    },
+    include: { service: true }
+  });
+
+  const overlap = existingApts.some((apt) => {
+      const aptBufferMs = apt.service.buffer_minutes * 60000;
+      const aptEndWithBuffer = new Date(apt.end_time.getTime() + aptBufferMs);
+      return apt.start_time < newEndTimeWithBuffer && aptEndWithBuffer > newStartTime;
+  });
+
+  if (overlap) {
+    throw new Error("The selected time slot is no longer available.");
+  }
+
+  await prisma.appointment.update({
+    where: { id: appointmentId },
+    data: {
+      start_time: newStartTime,
+      end_time: newEndTime,
+      // If it was PENDING, keep it PENDING, otherwise if CONFIRMED, it remains CONFIRMED
+    }
+  });
+
+  revalidatePath("/dashboard/client/appointments");
+  revalidatePath(`/dashboard/provider/appointments`);
+}

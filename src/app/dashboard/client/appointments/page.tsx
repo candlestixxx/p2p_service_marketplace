@@ -1,4 +1,5 @@
 "use client";
+import { RescheduleDialog } from "@/components/RescheduleDialog";
 
 import { useEffect, useState } from "react";
 import { getClientAppointments, cancelAppointment, createReview } from "@/actions/client";
@@ -96,14 +97,22 @@ export default function ClientAppointmentsPage() {
                       {apt.status}
                     </div>
                     {(!isPast && (apt.status === 'PENDING' || apt.status === 'CONFIRMED')) && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        disabled={cancellingId === apt.id}
-                        onClick={() => handleCancel(apt.id)}
-                      >
-                        {cancellingId === apt.id ? "Cancelling..." : "Cancel"}
-                      </Button>
+                      <div className="flex gap-2">
+                        <RescheduleDialog
+                          appointmentId={apt.id}
+                          serviceId={apt.serviceId}
+                          currentStartTime={apt.start_time}
+                          onSuccess={loadAppointments}
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={cancellingId === apt.id}
+                          onClick={() => handleCancel(apt.id)}
+                        >
+                          {cancellingId === apt.id ? "Cancelling..." : "Cancel"}
+                        </Button>
+                      </div>
                     )}
                     {canReview && (
                       <Dialog open={reviewApptId === apt.id} onOpenChange={(open) => !open && setReviewApptId(null)}>
