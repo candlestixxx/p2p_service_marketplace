@@ -18,5 +18,5 @@
 
 ## Phase 3: Scaling
 * [x] Geo-location filtering with Google Maps API (Simplified to City/State string match)
-* [ ] Advanced Calendar Sync (Google Calendar API, Outlook)
+* [x] Advanced Calendar Sync (Google Calendar API, Outlook) -> Implemented via `.ics` export fallbacks. Live syncing deferred to Phase 4 (See IDEAS.md).
 * [x] Admin Moderation Dashboard
