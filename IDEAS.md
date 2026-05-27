@@ -21,7 +21,7 @@ Rather than building separate OAuth 2.0 flows for Google, Microsoft, and Apple, 
    - Listen for `event.created` and `event.deleted` from Nylas to keep our internal UI updated without constant polling.
 
 ### Alternate Approaches
-- **Export Only (.ics):** The cheapest immediate solution. Generate `.ics` files for every confirmed appointment so providers can manually click and add them to their calendars.
+- **Export Only (.ics) [IMPLEMENTED]:** Generates `.ics` files for every confirmed appointment allowing users to download them to external calendars.
 - **Cal.com Open Source:** Fork and integrate `cal.com`'s core scheduling engine into our monorepo.
 
 ## UI/UX Polish

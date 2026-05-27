@@ -5,6 +5,7 @@ import { getProviderAppointments, updateAppointmentStatus } from "@/actions/prov
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { CalendarDays } from "lucide-react";
 import { Appointment, Service, User } from "@prisma/client";
 import { toast } from "sonner";
 
@@ -93,14 +94,21 @@ export default function ProviderAppointmentsPage() {
                     </div>
                   )}
                   {apt.status === 'CONFIRMED' && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={`/api/appointments/${apt.id}/ics`} download>
+                           <CalendarDays className="w-4 h-4 mr-2" /> Add to Calendar
+                        </a>
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
                       disabled={updatingId === apt.id}
                       onClick={() => handleUpdateStatus(apt.id, "CANCELLED")}
-                    >
-                      Cancel
-                    </Button>
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>

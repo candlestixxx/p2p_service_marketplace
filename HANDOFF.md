@@ -62,3 +62,7 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 - Created `src/actions/admin.ts` containing strict, role-gated server actions to fetch, read, and delete Users and Services.
 - Created an `Admin Dashboard` at `/dashboard/admin/page.tsx` displaying active users, providers, and their services, along with quick-delete moderation tools.
 - Modified `src/middleware.ts` to strictly enforce role bounds on all dashboard variants (Client, Provider, Admin).
+
+## Final Implementation Note (Calendar Synching via ICS)
+- To unblock immediate provider needs for external calendar syncing without heavy API dependencies, a dynamic `.ics` export route was implemented at `/api/appointments/[id]/ics`.
+- Both Client and Provider dashboards now feature native "Add to Calendar" buttons for `CONFIRMED` appointments that serve these generated ICS files.

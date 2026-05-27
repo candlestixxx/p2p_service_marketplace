@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Appointment, Service, User, Review } from "@prisma/client";
 import { toast } from "sonner";
+import { CalendarDays } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -98,6 +99,11 @@ export default function ClientAppointmentsPage() {
                     </div>
                     {(!isPast && (apt.status === 'PENDING' || apt.status === 'CONFIRMED')) && (
                       <div className="flex gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={`/api/appointments/${apt.id}/ics`} download>
+                             <CalendarDays className="w-4 h-4 mr-2" /> Add to Calendar
+                          </a>
+                        </Button>
                         <RescheduleDialog
                           appointmentId={apt.id}
                           serviceId={apt.serviceId}
