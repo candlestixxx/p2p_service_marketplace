@@ -23,6 +23,10 @@ export async function POST(req: Request) {
     const session = event.data.object as unknown as Record<string, unknown>;
     const metadata = session?.metadata as Record<string, string>;
 
+    // We update the record with the actual Payment Intent ID upon success
+    // because session.payment_intent is guaranteed to be present here
+    const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : null;
+
     if (metadata?.appointmentId) {
       const updatedApt = await prisma.appointment.update({
         where: {
@@ -30,6 +34,7 @@ export async function POST(req: Request) {
         },
         data: {
           status: "CONFIRMED",
+          ...(paymentIntentId && { paymentIntentId })
         },
         include: {
           client: true,

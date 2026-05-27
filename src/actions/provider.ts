@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { stripe } from "@/lib/stripe";
 
 export async function getProvider() {
   const session = await auth();
@@ -128,6 +129,19 @@ export async function updateAppointmentStatus(appointmentId: string, status: "CO
 
   if (appointment.providerId !== provider.id) {
     throw new Error("Unauthorized to modify this appointment");
+  }
+
+  // Trigger Stripe refund if payment was processed and Intent ID exists and Provider cancels
+  if (status === "CANCELLED" && appointment.paymentIntentId && appointment.status === "CONFIRMED") {
+      try {
+        await stripe.refunds.create({
+            payment_intent: appointment.paymentIntentId
+        });
+      } catch (err) {
+        // We log the error, but still cancel the appointment in our database
+        // In a production environment, this should trigger a manual review alert
+        console.error("Failed to automatically refund Stripe payment:", err);
+      }
   }
 
   await prisma.appointment.update({

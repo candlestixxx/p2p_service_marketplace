@@ -99,6 +99,15 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
       },
     });
 
+    // Save the Stripe session ID or Payment Intent ID to the appointment record for future refunds
+    // Due to async event emission, we only have the session ID reliably before completion
+    await prisma.appointment.update({
+      where: { id: appointment.id },
+      data: {
+        paymentIntentId: session.id
+      }
+    });
+
     return { url: session.url };
   } catch (error) {
     // Revert appointment creation on Stripe error

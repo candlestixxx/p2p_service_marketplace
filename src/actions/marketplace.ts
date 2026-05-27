@@ -28,7 +28,15 @@ export async function getAllServices(query?: string, location?: string, page: nu
     prisma.service.findMany({
       where: whereClause,
       include: {
-        provider: true,
+        provider: {
+          include: {
+            providerReviews: {
+              select: {
+                rating: true
+              }
+            }
+          }
+        },
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -41,18 +49,58 @@ export async function getAllServices(query?: string, location?: string, page: nu
     })
   ]);
 
+  const mappedServices = services.map(service => {
+     const totalRatings = service.provider.providerReviews.length;
+     const avgRating = totalRatings > 0
+       ? service.provider.providerReviews.reduce((acc, curr) => acc + curr.rating, 0) / totalRatings
+       : 0;
+
+     return {
+       ...service,
+       provider: {
+         ...service.provider,
+         avgRating: avgRating.toFixed(1),
+         totalRatings
+       }
+     }
+  });
+
   return {
-    services,
+    services: mappedServices,
     totalCount,
     totalPages: Math.ceil(totalCount / limit)
   };
 }
 
 export async function getServiceDetails(id: string) {
-  return prisma.service.findUnique({
+  const service = await prisma.service.findUnique({
     where: { id },
     include: {
-      provider: true,
+      provider: {
+        include: {
+          providerReviews: {
+             select: { rating: true, comment: true, createdAt: true, client: { select: { name: true } } },
+             orderBy: { createdAt: 'desc' },
+             take: 10
+          }
+        }
+      }
     },
   });
+
+  if (!service) return null;
+
+  const totalRatings = service.provider.providerReviews.length;
+  const avgRating = totalRatings > 0
+    ? service.provider.providerReviews.reduce((acc, curr) => acc + curr.rating, 0) / totalRatings
+    : 0;
+
+  return {
+    ...service,
+    provider: {
+      ...service.provider,
+      avgRating: avgRating.toFixed(1),
+      totalRatings
+    }
+  }
 }

@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { getServiceDetails } from "@/actions/marketplace";
-import { getProviderAvailabilityForService, bookAppointment } from "@/actions/booking";
+import { getProviderAvailabilityForService } from "@/actions/booking";
 import { createCheckoutSession } from "@/actions/payment";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format, addDays, startOfToday } from "date-fns";
+import { Star } from "lucide-react";
 import { Service, User } from "@prisma/client";
-
-type ServiceWithProvider = Service & { provider: User };
+type ServiceWithProvider = Service & { provider: User & { totalRatings: number, avgRating: string, providerReviews?: { rating: number, comment: string | null, client: { name: string | null } }[] } };
 
 export default function BookServicePage() {
   const params = useParams() as { id: string };
@@ -81,6 +81,13 @@ export default function BookServicePage() {
             <CardHeader>
               <CardTitle>{service.title}</CardTitle>
               <CardDescription>{service.provider.name}</CardDescription>
+              {service.provider.totalRatings > 0 && (
+                <div className="flex items-center gap-1 mt-1">
+                  <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" />
+                  <span className="text-sm font-medium">{service.provider.avgRating}</span>
+                  <span className="text-xs text-muted-foreground">({service.provider.totalRatings} reviews)</span>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
@@ -96,6 +103,28 @@ export default function BookServicePage() {
               </div>
             </CardContent>
           </Card>
+
+          {service.provider.providerReviews && service.provider.providerReviews.length > 0 && (
+             <Card>
+               <CardHeader>
+                  <CardTitle className="text-sm">Recent Reviews</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 {service.provider.providerReviews.map((r: { rating: number, comment: string | null, client: { name: string | null } }, idx: number) => (
+                    <div key={idx} className="border-b last:border-0 pb-3 last:pb-0">
+                       <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{r.client.name}</span>
+                          <span className="text-xs text-yellow-500 flex items-center">
+                             {r.rating} <Star className="w-3 h-3 fill-yellow-400 ml-0.5" />
+                          </span>
+                       </div>
+                       {r.comment && <p className="text-xs text-muted-foreground mt-1">&quot;{r.comment}&quot;</p>}
+                    </div>
+                 ))}
+               </CardContent>
+             </Card>
+          )}
+
         </div>
 
         <div className="md:col-span-2 space-y-6">

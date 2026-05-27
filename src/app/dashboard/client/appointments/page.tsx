@@ -1,19 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getClientAppointments, cancelAppointment } from "@/actions/client";
+import { getClientAppointments, cancelAppointment, createReview } from "@/actions/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Appointment, Service, User } from "@prisma/client";
+import { Appointment, Service, User, Review } from "@prisma/client";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type AppointmentWithDetails = Appointment & { service: Service, provider: User };
+type AppointmentWithDetails = Appointment & { service: Service, provider: User, review: Review | null };
 
 export default function ClientAppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  const [reviewApptId, setReviewApptId] = useState<string | null>(null);
+  const [rating, setRating] = useState<string>("5");
+  const [comment, setComment] = useState("");
 
   const loadAppointments = async () => {
     const data = await getClientAppointments();
@@ -42,6 +50,23 @@ export default function ClientAppointmentsPage() {
     }
   };
 
+  const handleReviewSubmit = async () => {
+     if (!reviewApptId) return;
+
+     try {
+       await createReview(reviewApptId, parseInt(rating, 10), comment);
+       toast.success("Review submitted successfully!");
+       setReviewApptId(null);
+       setRating("5");
+       setComment("");
+       await loadAppointments();
+     } catch (e: unknown) {
+       toast.error((e as Error).message || "Failed to submit review");
+     }
+  };
+
+  const now = new Date();
+
   return (
     <Card>
       <CardHeader>
@@ -55,30 +80,84 @@ export default function ClientAppointmentsPage() {
           <div className="text-center text-muted-foreground p-4">No appointments found.</div>
         ) : (
           <div className="space-y-4">
-            {appointments.map((apt) => (
-              <div key={apt.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 last:border-0 last:pb-0 gap-4">
-                <div>
-                  <h3 className="font-medium text-lg">{apt.service.title}</h3>
-                  <p className="text-sm text-muted-foreground">Provider: {apt.provider.name}</p>
-                  <p className="text-sm font-semibold mt-1 text-foreground">{format(new Date(apt.start_time), 'PPpp')}</p>
-                </div>
-                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
-                  <div className={`text-sm inline-block px-3 py-1 font-medium rounded-full ${apt.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : apt.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                    {apt.status}
+            {appointments.map((apt) => {
+              const isPast = new Date(apt.end_time) < now;
+              const canReview = apt.status === 'CONFIRMED' && isPast && !apt.review;
+
+              return (
+                <div key={apt.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 last:border-0 last:pb-0 gap-4">
+                  <div>
+                    <h3 className="font-medium text-lg">{apt.service.title}</h3>
+                    <p className="text-sm text-muted-foreground">Provider: {apt.provider.name}</p>
+                    <p className="text-sm font-semibold mt-1 text-foreground">{format(new Date(apt.start_time), 'PPpp')}</p>
                   </div>
-                  {(apt.status === 'PENDING' || apt.status === 'CONFIRMED') && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={cancellingId === apt.id}
-                      onClick={() => handleCancel(apt.id)}
-                    >
-                      {cancellingId === apt.id ? "Cancelling..." : "Cancel"}
-                    </Button>
-                  )}
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
+                    <div className={`text-sm inline-block px-3 py-1 font-medium rounded-full ${apt.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : apt.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                      {apt.status}
+                    </div>
+                    {(!isPast && (apt.status === 'PENDING' || apt.status === 'CONFIRMED')) && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={cancellingId === apt.id}
+                        onClick={() => handleCancel(apt.id)}
+                      >
+                        {cancellingId === apt.id ? "Cancelling..." : "Cancel"}
+                      </Button>
+                    )}
+                    {canReview && (
+                      <Dialog open={reviewApptId === apt.id} onOpenChange={(open) => !open && setReviewApptId(null)}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" onClick={() => setReviewApptId(apt.id)}>Leave Review</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Leave a Review</DialogTitle>
+                            <DialogDescription>
+                              How was your appointment for {apt.service.title}?
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="rating">Rating (1-5)</Label>
+                              <Select value={rating} onValueChange={setRating}>
+                                <SelectTrigger id="rating">
+                                  <SelectValue placeholder="Select a rating" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="5">5 - Excellent</SelectItem>
+                                  <SelectItem value="4">4 - Very Good</SelectItem>
+                                  <SelectItem value="3">3 - Average</SelectItem>
+                                  <SelectItem value="2">2 - Poor</SelectItem>
+                                  <SelectItem value="1">1 - Terrible</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="comment">Comment (Optional)</Label>
+                              <Input
+                                id="comment"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                placeholder="Write your review here..."
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button onClick={handleReviewSubmit}>Submit Review</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                    {apt.review && (
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                         <span className="text-yellow-500">★</span> {apt.review.rating}/5
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>
