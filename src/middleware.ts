@@ -18,7 +18,7 @@ export default middleware((req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL("/dashboard", nextUrl))
+      return Response.redirect(new URL(req.auth?.user?.role === "PROVIDER" ? "/dashboard/provider" : "/dashboard/client", nextUrl))
     }
     return;
   }

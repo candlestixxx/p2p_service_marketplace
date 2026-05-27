@@ -39,6 +39,12 @@ export default async function ProviderLayout({
             Availability
           </Link>
           <Link
+            href="/dashboard/provider/appointments"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Appointments
+          </Link>
+          <Link
             href="/dashboard/provider/calendar"
             className="text-muted-foreground transition-colors hover:text-foreground"
           >

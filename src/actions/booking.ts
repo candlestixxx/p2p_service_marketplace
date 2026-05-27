@@ -115,16 +115,19 @@ export async function bookAppointment(serviceId: string, startTime: Date) {
   const client = await getClient();
 
   const endTime = new Date(startTime.getTime() + service.duration_minutes * 60000);
-
-  // Calculate new appointment end time including buffer for overlap checking
   const endTimeWithBuffer = new Date(endTime.getTime() + service.buffer_minutes * 60000);
 
-  // We need to fetch appointments overlapping to check their custom buffers as well
+  // Fetch all appointments for the day to safely check buffer overlaps
+  const startOfDay = new Date(startTime);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const endOfDay = new Date(startTime);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
   const existingApts = await prisma.appointment.findMany({
     where: {
       providerId: service.providerId,
       status: { not: "CANCELLED" },
-      start_time: { lt: endTimeWithBuffer },
+      start_time: { gte: startOfDay, lt: endOfDay },
     },
     include: { service: true }
   });

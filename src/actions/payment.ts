@@ -24,12 +24,17 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
   // Calculate new appointment end time including buffer for overlap checking
   const endTimeWithBuffer = new Date(endTime.getTime() + service.buffer_minutes * 60000);
 
-  // We need to fetch appointments overlapping to check their custom buffers as well
+  // Fetch all appointments for the day to safely check buffer overlaps
+  const startOfDay = new Date(slotStart);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const endOfDay = new Date(slotStart);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
   const existingApts = await prisma.appointment.findMany({
     where: {
       providerId: service.providerId,
       status: { not: "CANCELLED" },
-      start_time: { lt: endTimeWithBuffer },
+      start_time: { gte: startOfDay, lt: endOfDay },
     },
     include: { service: true }
   });

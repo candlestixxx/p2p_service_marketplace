@@ -114,3 +114,27 @@ export async function updateProfile(data: { city: string; state: string; zip_cod
 
   revalidatePath("/dashboard/provider/profile");
 }
+
+export async function updateAppointmentStatus(appointmentId: string, status: "CONFIRMED" | "CANCELLED") {
+  const provider = await getProvider();
+
+  const appointment = await prisma.appointment.findUnique({
+    where: { id: appointmentId }
+  });
+
+  if (!appointment) {
+    throw new Error("Appointment not found");
+  }
+
+  if (appointment.providerId !== provider.id) {
+    throw new Error("Unauthorized to modify this appointment");
+  }
+
+  await prisma.appointment.update({
+    where: { id: appointmentId },
+    data: { status }
+  });
+
+  revalidatePath("/dashboard/provider/appointments");
+  revalidatePath("/dashboard/provider/calendar");
+}
