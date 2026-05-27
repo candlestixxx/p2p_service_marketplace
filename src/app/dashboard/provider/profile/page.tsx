@@ -1,6 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
+import { Trash2, Plus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ const formSchema = z.object({
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State is required"),
   zip_code: z.string().min(5, "Valid Zip Code required"),
+  image: z.string().url().optional().or(z.literal("")),
+  portfolioUrls: z.array(z.string().url("Must be a valid URL")).optional(),
 });
 
 export default function ProfilePage() {
@@ -33,6 +36,8 @@ export default function ProfilePage() {
       city: "",
       state: "",
       zip_code: "",
+      image: "",
+      portfolioUrls: [],
     },
   });
 
@@ -44,6 +49,8 @@ export default function ProfilePage() {
           city: user.city || "",
           state: user.state || "",
           zip_code: user.zip_code || "",
+          image: user.image || "",
+          portfolioUrls: user.portfolioUrls || [],
         });
       } catch (error) {
         toast.error("Failed to load profile");
@@ -53,6 +60,11 @@ export default function ProfilePage() {
     }
     load();
   }, [form]);
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "portfolioUrls" as never, // hack for zod array
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -119,6 +131,56 @@ export default function ProfilePage() {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Avatar Image URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/avatar.jpg" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-4 border rounded-md p-4 bg-muted/20">
+              <div className="flex items-center justify-between">
+                 <div>
+                   <FormLabel className="text-base">Portfolio Images</FormLabel>
+                   <CardDescription>Add URLs to images showcasing your previous work.</CardDescription>
+                 </div>
+                 <Button type="button" variant="outline" size="sm" onClick={() => append("")}>
+                    <Plus className="w-4 h-4 mr-2" /> Add Image
+                 </Button>
+              </div>
+
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`portfolioUrls.${index}`}
+                    render={({ field: inputField }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input placeholder="https://example.com/portfolio-image.jpg" {...inputField} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="text-destructive mt-1 hover:text-destructive hover:bg-destructive/10">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              {fields.length === 0 && (
+                 <p className="text-sm text-muted-foreground italic text-center py-2">No portfolio images added yet.</p>
+              )}
+            </div>
+
             <Button type="submit">Save Profile</Button>
           </form>
         </Form>

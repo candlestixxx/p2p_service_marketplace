@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { format, addDays, startOfToday } from "date-fns";
 import { Star } from "lucide-react";
 import { Service, User } from "@prisma/client";
-type ServiceWithProvider = Service & { provider: User & { totalRatings: number, avgRating: string, providerReviews?: { rating: number, comment: string | null, client: { name: string | null } }[] } };
+type ServiceWithProvider = Service & { provider: User & { image?: string | null, portfolioUrls?: string[], totalRatings: number, avgRating: string, providerReviews?: { rating: number, comment: string | null, client: { name: string | null } }[] } };
 
 export default function BookServicePage() {
   const params = useParams() as { id: string };
@@ -78,16 +78,25 @@ export default function BookServicePage() {
       <div className="mx-auto max-w-4xl w-full grid gap-6 md:grid-cols-3">
         <div className="md:col-span-1 space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle>{service.title}</CardTitle>
-              <CardDescription>{service.provider.name}</CardDescription>
-              {service.provider.totalRatings > 0 && (
+            <CardHeader className="flex flex-row items-start gap-4">
+              {service.provider.image ? (
+                 <img src={service.provider.image} alt="Provider Avatar" className="w-12 h-12 rounded-full object-cover shrink-0" />
+              ) : (
+                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                   <span className="text-xl font-bold text-muted-foreground">{service.provider.name?.[0]?.toUpperCase()}</span>
+                 </div>
+              )}
+              <div className="flex-1">
+                <CardTitle>{service.title}</CardTitle>
+                <CardDescription>{service.provider.name}</CardDescription>
+                {service.provider.totalRatings > 0 && (
                 <div className="flex items-center gap-1 mt-1">
                   <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" />
                   <span className="text-sm font-medium">{service.provider.avgRating}</span>
                   <span className="text-xs text-muted-foreground">({service.provider.totalRatings} reviews)</span>
                 </div>
               )}
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
@@ -103,6 +112,23 @@ export default function BookServicePage() {
               </div>
             </CardContent>
           </Card>
+
+          {service.provider.portfolioUrls && service.provider.portfolioUrls.length > 0 && (
+            <Card>
+              <CardHeader>
+                 <CardTitle className="text-sm">Portfolio</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-2">
+                  {service.provider.portfolioUrls.map((url, idx) => (
+                    <div key={idx} className="aspect-square rounded-md overflow-hidden bg-muted">
+                      <img src={url} alt={`Portfolio ${idx}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {service.provider.providerReviews && service.provider.providerReviews.length > 0 && (
              <Card>

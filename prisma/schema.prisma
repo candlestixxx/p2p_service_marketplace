@@ -36,6 +36,8 @@ model User {
   city String?
   state String?
   zip_code String?
+  image String?
+  portfolioUrls String[] @default([])
 
   // Relations
   services             Service[]

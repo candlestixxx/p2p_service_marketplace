@@ -14,7 +14,7 @@
 * [x] Implement Twilio SMS Webhooks
 * [x] Implement Resend Email Webhooks
 * [x] Provider Review & Rating System
-* [ ] Provider Portfolio Image Gallery
+* [x] Provider Portfolio Image Gallery
 
 ## Phase 3: Scaling
 * [ ] Geo-location filtering with Google Maps API

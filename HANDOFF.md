@@ -48,3 +48,11 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 - Wrote fallback checks: if API keys are missing in the environment, the system gracefully degrades to logging mock output rather than breaking the application checkout flow.
 - Reverted the Stripe API version back to the original `2026-04-22.dahlia` version string to fix a TypeScript SDK compilation error during build (the SDK was updated specifically for that timeline's types).
 - Updated `TODO.md` and `ROADMAP.md` tracking webhooks integration.
+
+## Last Actions Performed (Jules Context - Provider Portfolio Gallery)
+- Added `image` and `portfolioUrls` to the `User` Prisma model to support rich provider profiles.
+- Generated and applied the `add_portfolio_images` Prisma migration.
+- Updated the `updateProfile` server action in `src/actions/provider.ts` to persist these new fields.
+- Overhauled the Provider Profile UI (`src/app/dashboard/provider/profile/page.tsx`) utilizing `react-hook-form`'s `useFieldArray` to allow providers to dynamically add, edit, or remove an arbitrary number of portfolio image URLs.
+- Enhanced the Marketplace Booking UI (`src/app/services/[id]/book/page.tsx`) to display the provider's avatar and render a CSS grid gallery for their portfolio.
+- Verified type safety (removed explicit `any`), ran tests, and successfully completed the production build.

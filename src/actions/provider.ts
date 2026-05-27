@@ -101,16 +101,21 @@ export async function getProviderAppointments() {
   }
 }
 
-export async function updateProfile(data: { city: string; state: string; zip_code: string }) {
+export async function updateProfile(data: { city: string; state: string; zip_code: string; image?: string; portfolioUrls?: string[] }) {
   const provider = await getProvider();
+
+  const updateData: { city: string; state: string; zip_code: string; image?: string; portfolioUrls?: string[] } = {
+    city: data.city,
+    state: data.state,
+    zip_code: data.zip_code,
+  };
+
+  if (data.image !== undefined) updateData.image = data.image;
+  if (data.portfolioUrls !== undefined) updateData.portfolioUrls = data.portfolioUrls;
 
   await prisma.user.update({
     where: { id: provider.id },
-    data: {
-      city: data.city,
-      state: data.state,
-      zip_code: data.zip_code,
-    }
+    data: updateData
   });
 
   revalidatePath("/dashboard/provider/profile");
