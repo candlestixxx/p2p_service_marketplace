@@ -158,3 +158,16 @@ export async function rescheduleAppointment(appointmentId: string, newStartTime:
   revalidatePath("/dashboard/client/appointments");
   revalidatePath(`/dashboard/provider/appointments`);
 }
+
+export async function updateClientProfile(data: { name: string }) {
+  const client = await getClient();
+
+  await prisma.user.update({
+    where: { id: client.id },
+    data: {
+      name: data.name,
+    }
+  });
+
+  revalidatePath("/dashboard/client/profile");
+}

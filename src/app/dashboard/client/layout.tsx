@@ -21,6 +21,12 @@ export default async function ClientLayout({
             ServiceHub Client
           </Link>
           <Link
+            href="/dashboard/client/profile"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Profile
+          </Link>
+          <Link
             href="/dashboard/client/appointments"
             className="text-muted-foreground transition-colors hover:text-foreground"
           >

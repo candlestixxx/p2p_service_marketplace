@@ -90,3 +90,7 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 - Providers can explicitly upgrade to PRO within their profile settings.
 - The `createCheckoutSession` logic dynamically queries the Provider's Pro status; Standard providers pay a 10% platform fee, while PRO providers pay 0%.
 - Verified via UI/UX `<ShieldCheck />` badges that PRO marketplace listings are distinct.
+
+## Final Feature (Client Profile Management)
+- Implemented `/dashboard/client/profile` allowing clients to view and update their full name.
+- Included `updateClientProfile` inside `src/actions/client.ts` to push updates straight to Prisma.
