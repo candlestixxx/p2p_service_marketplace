@@ -68,3 +68,24 @@ export async function getAdminPlatformAnalytics() {
     platformFees
   };
 }
+
+export async function getAllReviews() {
+  await checkAdmin();
+  return prisma.review.findMany({
+    include: {
+       client: { select: { name: true, email: true } },
+       provider: { select: { name: true } },
+       appointment: { select: { service: { select: { title: true } } } }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+export async function deleteReview(id: string) {
+  await checkAdmin();
+  await prisma.review.delete({
+    where: { id }
+  });
+  revalidatePath("/dashboard/admin");
+  revalidatePath("/services");
+}

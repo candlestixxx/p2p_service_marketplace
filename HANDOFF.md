@@ -103,3 +103,7 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 ## Final Feature (Service Categories)
 - Updated `prisma/schema.prisma` mapping `category` logic onto active service listings.
 - Improved the public discovery hub (`/services`) by mapping these categories into Native HTML select inputs for fast browser filtering, while appending visual badging to the actual service cards.
+
+## Final Feature (Admin Review Moderation)
+- Added `getAllReviews` and `deleteReview` actions to `src/actions/admin.ts`.
+- Integrated a new UI panel inside `/dashboard/admin` that surfaces all platform reviews and allows admins to permanently delete fraudulent or abusive comments.

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllUsers, deleteUser, getAllServices, deleteService, getAdminPlatformAnalytics } from "@/actions/admin";
+import { getAllUsers, deleteUser, getAllServices, deleteService, getAdminPlatformAnalytics, getAllReviews, deleteReview } from "@/actions/admin";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, LayoutList, DollarSign, Wallet } from "lucide-react";
+import { Users, LayoutList, DollarSign, Wallet, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { User, Service } from "@prisma/client";
@@ -11,6 +11,7 @@ import { User, Service } from "@prisma/client";
 export default function AdminDashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [services, setServices] = useState<(Service & { provider: User })[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [analytics, setAnalytics] = useState<{totalUsers: number, totalServices: number, totalGMV: number, platformFees: number} | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -20,9 +21,11 @@ export default function AdminDashboardPage() {
       const usersData = await getAllUsers();
       const servicesData = await getAllServices();
       const analyticsData = await getAdminPlatformAnalytics();
+      const reviewsData = await getAllReviews();
       setUsers(usersData);
       setServices(servicesData);
       setAnalytics(analyticsData);
+      setReviews(reviewsData);
     } catch (e) {
       toast.error("Failed to load admin data. Are you an Admin?");
     } finally {
@@ -42,6 +45,17 @@ export default function AdminDashboardPage() {
       loadData();
     } catch (e: unknown) {
       toast.error((e as Error).message || "Failed to delete user.");
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm("Are you sure you want to permanently delete this review?")) return;
+    try {
+      await deleteReview(id);
+      toast.success("Review deleted.");
+      loadData();
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Failed to delete review.");
     }
   };
 
@@ -150,6 +164,34 @@ export default function AdminDashboardPage() {
               </div>
             ))}
              {services.length === 0 && <p className="text-sm text-muted-foreground">No services found.</p>}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Platform Reviews</CardTitle>
+          <CardDescription>All client reviews left on provider services.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {reviews.map(r => (
+              <div key={r.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                <div className="max-w-2xl">
+                  <div className="flex items-center gap-2 mb-1">
+                     <span className="font-medium">{r.client.name || "Unknown Client"}</span>
+                     <span className="text-xs text-muted-foreground border px-2 rounded-full">to {r.provider.name}</span>
+                     <span className="flex items-center text-sm font-semibold text-yellow-500">
+                       {r.rating} <Star className="w-3 h-3 fill-yellow-400 ml-0.5" />
+                     </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-1">Service: {r.appointment.service.title}</p>
+                  {r.comment && <p className="text-sm italic text-muted-foreground">&quot;{r.comment}&quot;</p>}
+                </div>
+                <Button variant="ghost" className="text-destructive hover:bg-destructive hover:text-white" size="sm" onClick={() => handleDeleteReview(r.id)}>Delete</Button>
+              </div>
+            ))}
+             {reviews.length === 0 && <p className="text-sm text-muted-foreground">No reviews found.</p>}
           </div>
         </CardContent>
       </Card>
