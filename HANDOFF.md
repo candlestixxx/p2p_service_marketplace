@@ -75,3 +75,8 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 ## Final Implementation Note (Real-time Polling)
 - Addressed the final UI/UX Idea: Real-time dashboard updates.
 - Rather than implementing heavy, persistent-connection Websockets (which scale poorly on serverless platforms like Vercel without paid external services like Pusher), a lightweight 15-second polling interval was implemented across the Provider and Client dashboards. This achieves the exact same UX requirement—automatically surfacing new bookings or status changes without requiring the user to refresh the page.
+
+## Final Implementation Note (Analytics Dashboards)
+- The raw `redirect` logic on the `/dashboard/client` and `/dashboard/provider` roots was removed.
+- Implemented `getClientAnalytics` and `getProviderAnalytics` server actions querying `prisma.appointment` arrays to reduce performance metrics.
+- Built statistical UI dashboards representing lifetime revenue, booked appointments, and top providers, rendering seamlessly on user login.
