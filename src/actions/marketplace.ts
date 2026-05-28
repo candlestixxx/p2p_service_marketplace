@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 
-export async function getAllServices(query?: string, location?: string, page: number = 1, limit: number = 12) {
+export async function getAllServices(query?: string, location?: string, category?: string, page: number = 1, limit: number = 12) {
   const whereClause = {
     AND: [
       query ? {
@@ -11,6 +11,9 @@ export async function getAllServices(query?: string, location?: string, page: nu
           { description: { contains: query, mode: "insensitive" as const } },
           { provider: { name: { contains: query, mode: "insensitive" as const } } },
         ],
+      } : {},
+      category ? {
+        category: { equals: category, mode: "insensitive" as const }
       } : {},
       location ? {
         provider: {

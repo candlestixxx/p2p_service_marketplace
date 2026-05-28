@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { addService, getProviderServices, deleteProviderService } from "@/actions/provider";
 import { Trash2 } from "lucide-react";
@@ -25,6 +26,7 @@ const formSchema = z.object({
     message: "Title must be at least 2 characters.",
   }),
   description: z.string().optional(),
+  category: z.string().optional(),
   price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
     message: "Price must be a valid positive number.",
   }),
@@ -45,6 +47,7 @@ export default function ServicesPage() {
     defaultValues: {
       title: "",
       description: "",
+      category: "Other",
       price: "0",
       duration_minutes: "30",
       buffer_minutes: "0",
@@ -65,6 +68,7 @@ export default function ServicesPage() {
       await addService({
         title: values.title,
         description: values.description || "",
+        category: values.category || "Other",
         price: Number(values.price),
         duration_minutes: Number(values.duration_minutes),
         buffer_minutes: Number(values.buffer_minutes),
@@ -112,6 +116,32 @@ export default function ServicesPage() {
                     <FormControl>
                       <Input placeholder="e.g. 1 Hour Plumbing Consultation" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Cleaning">Cleaning</SelectItem>
+                        <SelectItem value="Repair">Repair</SelectItem>
+                        <SelectItem value="Tech">Tech</SelectItem>
+                        <SelectItem value="Beauty">Beauty</SelectItem>
+                        <SelectItem value="Pet Care">Pet Care</SelectItem>
+                        <SelectItem value="Fitness">Fitness</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -190,7 +220,8 @@ export default function ServicesPage() {
                 <div key={service.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                   <div>
                     <h3 className="font-medium">{service.title}</h3>
-                    <p className="text-sm text-muted-foreground">{service.description}</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">{service.category}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-1">{service.description}</p>
                   </div>
                   <div className="flex items-center gap-4 text-right">
                     <div>

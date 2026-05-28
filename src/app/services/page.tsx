@@ -2,6 +2,8 @@ import { getAllServices } from "@/actions/marketplace";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import { Search, MapPin, ChevronLeft, ChevronRight, Star, ShieldCheck } from "lucide-react";
 import { auth } from "@/auth";
@@ -16,15 +18,17 @@ export default async function MarketplacePage({
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === "string" ? resolvedParams.q : "";
   const loc = typeof resolvedParams.loc === "string" ? resolvedParams.loc : "";
+  const category = typeof resolvedParams.category === "string" ? resolvedParams.category : "";
   const page = typeof resolvedParams.page === "string" ? parseInt(resolvedParams.page, 10) : 1;
 
-  const { services, totalPages } = await getAllServices(q, loc, page);
+  const { services, totalPages } = await getAllServices(q, loc, category, page);
 
   // Helper to maintain other search params when changing pages
   const createPageUrl = (newPage: number) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (loc) params.set("loc", loc);
+    if (category) params.set("category", category);
     params.set("page", newPage.toString());
     return `/services?${params.toString()}`;
   };
@@ -74,6 +78,19 @@ export default async function MarketplacePage({
               </div>
               <div className="hidden sm:block w-[1px] h-8 bg-border"></div>
               <div className="relative flex-1 w-full border-t sm:border-t-0">
+                <select name="category" defaultValue={category} className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent pl-4 pr-8 py-2 text-base appearance-none cursor-pointer text-muted-foreground">
+                   <option value="">All Categories</option>
+                   <option value="Cleaning">Cleaning</option>
+                   <option value="Repair">Repair</option>
+                   <option value="Tech">Tech</option>
+                   <option value="Beauty">Beauty</option>
+                   <option value="Pet Care">Pet Care</option>
+                   <option value="Fitness">Fitness</option>
+                   <option value="Other">Other</option>
+                </select>
+              </div>
+              <div className="hidden sm:block w-[1px] h-8 bg-border"></div>
+              <div className="relative flex-1 w-full border-t sm:border-t-0">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="search"
@@ -108,6 +125,7 @@ export default async function MarketplacePage({
                     </CardDescription>
                     <div className="flex items-center gap-2">
                       <CardTitle className="line-clamp-1">{service.title}</CardTitle>
+                      {service.category && <Badge variant="secondary" className="shrink-0">{service.category}</Badge>}
                       {service.provider.isPro && (
                         <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0" />
                       )}

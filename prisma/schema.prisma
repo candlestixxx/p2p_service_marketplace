@@ -55,6 +55,7 @@ model Service {
   id               String   @id @default(cuid())
   title            String
   description      String?
+  category         String? @default("Other")
   price            Float
   duration_minutes Int
   buffer_minutes   Int      @default(0)

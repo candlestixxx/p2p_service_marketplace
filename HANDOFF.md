@@ -99,3 +99,7 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 - Built the `getPublicProviderDetails` server action inside `src/actions/marketplace.ts` to aggregate a provider's active services, their portfolio gallery, and client reviews.
 - Designed a distinct `/provider/[id]/page.tsx` public route enabling clients to review a specific provider's entire catalog and reputation before booking.
 - Connected marketplace service cards and checkout views to the new provider profile pages.
+
+## Final Feature (Service Categories)
+- Updated `prisma/schema.prisma` mapping `category` logic onto active service listings.
+- Improved the public discovery hub (`/services`) by mapping these categories into Native HTML select inputs for fast browser filtering, while appending visual badging to the actual service cards.
