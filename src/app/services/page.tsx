@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Search, MapPin, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Search, MapPin, ChevronLeft, ChevronRight, Star, ShieldCheck } from "lucide-react";
 import { auth } from "@/auth";
 import { LoginButton, LogoutButton } from "@/components/auth-buttons";
 
@@ -106,7 +106,12 @@ export default async function MarketplacePage({
                         </span>
                       )}
                     </CardDescription>
-                    <CardTitle className="line-clamp-1">{service.title}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="line-clamp-1">{service.title}</CardTitle>
+                      {service.provider.isPro && (
+                        <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0" />
+                      )}
+                    </div>
                     {service.provider.totalRatings > 0 && (
                        <div className="flex items-center gap-1 mt-1">
                           <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" />

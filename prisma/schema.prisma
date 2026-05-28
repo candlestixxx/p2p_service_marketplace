@@ -34,6 +34,8 @@ model User {
   password String?
   stripeAccountId String?
   stripeConnectLinked Boolean @default(false)
+  isPro               Boolean @default(false)
+  stripeSubscriptionId String?
   city String?
   state String?
   zip_code String?

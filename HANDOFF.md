@@ -84,3 +84,9 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 ## Final Polish Actions
 - Refactored `createCheckoutSession` to return structured JSON `success` and `message` payloads, preventing Next.js 15 Server Action security boundaries from masking booking error texts.
 - Implemented high-level `Admin Platform Analytics` querying live GMV and total registration counts, displaying them in metric UI cards inside `/dashboard/admin`.
+
+## Final Feature (Provider Subscriptions & Revenue Model)
+- Added `isPro` toggle functionality.
+- Providers can explicitly upgrade to PRO within their profile settings.
+- The `createCheckoutSession` logic dynamically queries the Provider's Pro status; Standard providers pay a 10% platform fee, while PRO providers pay 0%.
+- Verified via UI/UX `<ShieldCheck />` badges that PRO marketplace listings are distinct.

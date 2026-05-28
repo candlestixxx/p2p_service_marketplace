@@ -67,7 +67,8 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
   const baseUrl = `${protocol}://${host}`;
 
   const amountCents = Math.round(service.price * 100);
-  const platformFee = Math.round(amountCents * 0.10); // 10% fee
+  // Pro providers pay 0% platform fee, regular providers pay 10%
+  const platformFee = service.provider.isPro ? 0 : Math.round(amountCents * 0.10);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -87,7 +88,7 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
       ],
       mode: "payment",
       payment_intent_data: {
-        application_fee_amount: platformFee,
+        ...(platformFee > 0 ? { application_fee_amount: platformFee } : {}),
         transfer_data: {
           destination: service.provider.stripeAccountId,
         },

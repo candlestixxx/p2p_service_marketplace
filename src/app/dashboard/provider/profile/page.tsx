@@ -16,6 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProfile, getProvider } from "@/actions/provider";
+import { toggleProStatus } from "@/actions/pro";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -29,6 +31,8 @@ const formSchema = z.object({
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
+  const [isPro, setIsPro] = useState(false);
+  const [togglingPro, setTogglingPro] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,6 +49,7 @@ export default function ProfilePage() {
     async function load() {
       try {
         const user = await getProvider();
+        setIsPro(user.isPro);
         form.reset({
           city: user.city || "",
           state: user.state || "",
@@ -79,8 +84,48 @@ export default function ProfilePage() {
      return <div className="p-8 text-center text-muted-foreground">Loading profile...</div>;
   }
 
+  const handleTogglePro = async () => {
+    setTogglingPro(true);
+    try {
+       await toggleProStatus();
+       setIsPro(!isPro);
+       toast.success(`Successfully ${!isPro ? 'upgraded to PRO' : 'downgraded to Standard'}`);
+    } catch(e) {
+       toast.error("Failed to toggle Pro status");
+    } finally {
+       setTogglingPro(false);
+    }
+  };
+
   return (
-    <Card className="max-w-2xl">
+    <div className="space-y-6 max-w-2xl">
+      <Card>
+        <CardHeader className="pb-4">
+           <div className="flex items-center justify-between">
+             <div>
+               <CardTitle>Subscription Tier</CardTitle>
+               <CardDescription>Manage your platform membership.</CardDescription>
+             </div>
+             {isPro ? (
+               <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 py-1">PRO PLAN</Badge>
+             ) : (
+               <Badge variant="secondary" className="py-1">STANDARD PLAN</Badge>
+             )}
+           </div>
+        </CardHeader>
+        <CardContent>
+           <p className="text-sm text-muted-foreground mb-4">
+             {isPro
+               ? "You are currently enjoying PRO benefits. The 10% platform fee is entirely waived on all your bookings."
+               : "Upgrade to PRO to waive the 10% platform fee on all bookings and receive a priority badge on your marketplace listings."}
+           </p>
+           <Button variant={isPro ? "outline" : "default"} onClick={handleTogglePro} disabled={togglingPro}>
+             {togglingPro ? "Processing..." : isPro ? "Cancel Pro Subscription" : "Upgrade to Pro"}
+           </Button>
+        </CardContent>
+      </Card>
+
+    <Card>
       <CardHeader>
         <CardTitle>Public Profile</CardTitle>
         <CardDescription>
@@ -186,5 +231,6 @@ export default function ProfilePage() {
         </Form>
       </CardContent>
     </Card>
+    </div>
   );
 }

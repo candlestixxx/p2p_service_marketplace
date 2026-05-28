@@ -9,9 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format, addDays, startOfToday } from "date-fns";
-import { Star } from "lucide-react";
+import { Star, ShieldCheck } from "lucide-react";
 import { Service, User } from "@prisma/client";
-type ServiceWithProvider = Service & { provider: User & { image?: string | null, portfolioUrls?: string[], totalRatings: number, avgRating: string, providerReviews?: { rating: number, comment: string | null, client: { name: string | null } }[] } };
+type ServiceWithProvider = Service & { provider: User & { image?: string | null, portfolioUrls?: string[], isPro: boolean, totalRatings: number, avgRating: string, providerReviews?: { rating: number, comment: string | null, client: { name: string | null } }[] } };
 
 export default function BookServicePage() {
   const params = useParams() as { id: string };
@@ -89,7 +89,12 @@ export default function BookServicePage() {
                  </div>
               )}
               <div className="flex-1">
-                <CardTitle>{service.title}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle>{service.title}</CardTitle>
+                  {service.provider.isPro && (
+                    <ShieldCheck className="w-6 h-6 text-amber-500 shrink-0" />
+                  )}
+                </div>
                 <CardDescription>{service.provider.name}</CardDescription>
                 {service.provider.totalRatings > 0 && (
                 <div className="flex items-center gap-1 mt-1">
