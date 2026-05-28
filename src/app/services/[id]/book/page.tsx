@@ -61,12 +61,14 @@ export default function BookServicePage() {
   const handleBook = async (slotStart: Date) => {
     setBooking(true);
     try {
-      const { url } = await createCheckoutSession(id, slotStart);
-      if (url) {
-        window.location.href = url;
+      const res = await createCheckoutSession(id, slotStart);
+      if (res.success && res.url) {
+        window.location.href = res.url;
+      } else {
+        toast.error(res.message || "Failed to initiate checkout.");
       }
     } catch (_error) {
-      toast.error("Failed to initiate checkout. Check your auth status or if the provider is fully onboarded.");
+      toast.error("Failed to initiate checkout. Check your network connection.");
     }
     setBooking(false);
   };

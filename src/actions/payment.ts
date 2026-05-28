@@ -12,10 +12,10 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
     include: { provider: true },
   });
 
-  if (!service) throw new Error("Service not found");
+  if (!service) return { success: false, message: "Service not found" };
 
   if (!service.provider.stripeConnectLinked || !service.provider.stripeAccountId) {
-    throw new Error("This provider cannot currently accept payments.");
+    return { success: false, message: "This provider cannot currently accept payments." };
   }
 
   const client = await getClient();
@@ -46,7 +46,7 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
   });
 
   if (overlap) {
-    throw new Error("Time slot is no longer available.");
+    return { success: false, message: "Time slot is no longer available." };
   }
 
   // Create PENDING appointment
@@ -108,11 +108,11 @@ export async function createCheckoutSession(serviceId: string, slotStart: Date) 
       }
     });
 
-    return { url: session.url };
-  } catch (error) {
+    return { success: true, url: session.url };
+  } catch (error: unknown) {
     // Revert appointment creation on Stripe error
     await prisma.appointment.delete({ where: { id: appointment.id } });
-    throw error;
+    return { success: false, message: (error as Error).message || "Failed to create checkout session" };
   }
 }
 

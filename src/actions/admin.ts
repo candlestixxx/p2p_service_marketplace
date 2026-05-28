@@ -45,3 +45,26 @@ export async function deleteService(id: string) {
   revalidatePath("/dashboard/admin");
   revalidatePath("/services");
 }
+
+export async function getAdminPlatformAnalytics() {
+  await checkAdmin();
+
+  const [totalUsers, totalServices, confirmedAppointments] = await Promise.all([
+     prisma.user.count(),
+     prisma.service.count(),
+     prisma.appointment.findMany({
+        where: { status: 'CONFIRMED' },
+        include: { service: true }
+     })
+  ]);
+
+  const totalGMV = confirmedAppointments.reduce((acc, curr) => acc + curr.service.price, 0);
+  const platformFees = totalGMV * 0.10; // 10% fee hardcoded in checkout logic
+
+  return {
+    totalUsers,
+    totalServices,
+    totalGMV,
+    platformFees
+  };
+}
