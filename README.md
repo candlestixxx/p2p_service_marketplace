@@ -1,32 +1,23 @@
-# ServiceHub
+# ServiceHub (v1.0.0)
 
-ServiceHub is a powerful two-sided marketplace (an "Uber for Services") that seamlessly connects clients with service providers.
+ServiceHub is a comprehensive "Uber for Services" two-sided marketplace. It connects Service Providers (supply) with Clients (demand) using a highly robust architecture built on Next.js 15, Prisma, PostgreSQL, NextAuth, and Stripe Connect.
 
-This platform was built leveraging a modern tech stack to handle discovery, real-time availability scheduling, authentication, and secure payments via Stripe Connect.
+## Core Architecture
+- **Marketplace Discovery**: Location-based search (`city`, `state`, `zip_code`) allowing clients to find top-rated providers in their area.
+- **Provider Dashboards**: Providers can list unlimited services, upload portfolio images, manage Custom Weekly Availability, and view a unified Visual Calendar map of their bookings.
+- **Client Dashboards**: Clients can view past and upcoming appointments, leave public Star Reviews, and dynamically download `.ics` calendar files for personal sync.
+- **The Booking Engine**: Automatically parses a provider's custom schedule, calculates 30-minute time slots, and cross-references existing bookings and prep-buffers to calculate real-time available slots, mathematically preventing double-booking overlaps.
+- **Escrow Payments**: Integrated with Stripe Connect. Payments are captured up-front upon booking and routed directly to the Provider's express dashboard.
+- **Pro Subscriptions**: Standard providers pay a 10% platform fee per booking. Providers can upgrade to "PRO" to waive the fee entirely and earn distinct verification badges.
+- **Real-Time Polling**: Dashboards feature Vercel-friendly 15-second polling intervals to simulate WebSockets, auto-populating new bookings without user refresh.
+- **Admin Moderation**: Highly secure `ADMIN` role dashboard tracking Platform Lifetime GMV, active users, and providing 1-click removal of malicious service listings.
+- **Notifications**: Integrated Twilio SMS and Resend Email SDKs for instant appointment booking and cancellation receipts.
 
-## Core Features
-*   **Role-based Authentication**: NextAuth.js secures the platform, providing distinct experiences for `CLIENT` and `PROVIDER` roles.
-*   **Provider Dashboards**: Professionals can manage their service offerings, define weekly availability schedules, update geographical tracking data, and securely link their Stripe accounts for payouts.
-*   **Client Dashboards**: Customers have a dedicated portal to review their upcoming and past bookings.
-*   **Geographical Search**: A dynamic discovery marketplace allows clients to find providers by service keywords, city, or zip code.
-*   **Smart Scheduling Engine**: Real-time logic cross-references provider hours with existing appointments—including custom pre/post-appointment buffer times—to guarantee conflict-free bookings.
-*   **Stripe Connect Integration**: Embedded payment processing handles platform fees seamlessly, holding appointments in escrow via webhooks.
+## Quick Start
+1. `npm install`
+2. Configure `.env` with your Postgres `DATABASE_URL` and Stripe keys.
+3. `npx prisma db push`
+4. `npx prisma db seed` (Generates test providers, clients, and services)
+5. `npm run dev`
 
-## Tech Stack
-*   **Framework**: Next.js 15 (App Router)
-*   **Database**: PostgreSQL
-*   **ORM**: Prisma
-*   **Authentication**: NextAuth.js (Auth.js v5) with `bcryptjs`
-*   **Payments**: Stripe Connect
-*   **UI / Styling**: Tailwind CSS v4, shadcn/ui, `react-hook-form`, Zod
-*   **Calendar**: `react-big-calendar`, `date-fns`
-
-## Getting Started
-To spin up a local development environment:
-
-1. Clone the repository.
-2. Run `npm install` to install dependencies.
-3. Configure your environment variables in `.env` based on `.env.example`. You will need database URLs and Stripe keys.
-4. Run `npx prisma db push` to generate the database schema.
-5. Run `npx prisma db seed` to instantly populate the database with demo providers, clients, services, and bookings.
-6. Run `npm run dev` to start the Next.js server.
+Read `IDEAS.md` and `HANDOFF.md` for information on upcoming integration pipelines (Nylas Calendar Sync).
