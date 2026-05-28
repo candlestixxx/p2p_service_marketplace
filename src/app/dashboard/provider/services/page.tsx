@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { addService, getProviderServices } from "@/actions/provider";
+import { addService, getProviderServices, deleteProviderService } from "@/actions/provider";
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Service } from "@prisma/client";
@@ -37,6 +38,7 @@ const formSchema = z.object({
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,6 +74,20 @@ export default function ServicesPage() {
       loadServices();
     } catch (_error) {
       toast.error("Failed to add service");
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Are you sure you want to delete this service? It will remove it from the public marketplace.")) return;
+    setDeletingId(id);
+    try {
+      await deleteProviderService(id);
+      toast.success("Service deleted");
+      loadServices();
+    } catch (e) {
+      toast.error("Failed to delete service");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -176,11 +192,22 @@ export default function ServicesPage() {
                     <h3 className="font-medium">{service.title}</h3>
                     <p className="text-sm text-muted-foreground">{service.description}</p>
                   </div>
-                  <div className="text-right">
-                    <div className="font-medium">${service.price}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {service.duration_minutes} mins (+{service.buffer_minutes} min buffer)
+                  <div className="flex items-center gap-4 text-right">
+                    <div>
+                      <div className="font-medium">${service.price}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {service.duration_minutes} mins (+{service.buffer_minutes} min buffer)
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:bg-destructive hover:text-white"
+                      disabled={deletingId === service.id}
+                      onClick={() => handleDelete(service.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
