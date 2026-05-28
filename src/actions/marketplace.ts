@@ -104,3 +104,35 @@ export async function getServiceDetails(id: string) {
     }
   }
 }
+
+export async function getPublicProviderDetails(providerId: string) {
+  const provider = await prisma.user.findUnique({
+    where: { id: providerId },
+    include: {
+      services: {
+        orderBy: { createdAt: 'desc' }
+      },
+      providerReviews: {
+        include: {
+           client: { select: { name: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+      }
+    }
+  });
+
+  if (!provider || provider.role !== "PROVIDER") {
+     return null;
+  }
+
+  const totalRatings = provider.providerReviews.length;
+  const avgRating = totalRatings > 0
+    ? provider.providerReviews.reduce((acc, curr) => acc + curr.rating, 0) / totalRatings
+    : 0;
+
+  return {
+    ...provider,
+    avgRating: avgRating.toFixed(1),
+    totalRatings
+  };
+}

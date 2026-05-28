@@ -94,3 +94,8 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 ## Final Feature (Client Profile Management)
 - Implemented `/dashboard/client/profile` allowing clients to view and update their full name.
 - Included `updateClientProfile` inside `src/actions/client.ts` to push updates straight to Prisma.
+
+## Final Feature (Public Provider Profiles)
+- Built the `getPublicProviderDetails` server action inside `src/actions/marketplace.ts` to aggregate a provider's active services, their portfolio gallery, and client reviews.
+- Designed a distinct `/provider/[id]/page.tsx` public route enabling clients to review a specific provider's entire catalog and reputation before booking.
+- Connected marketplace service cards and checkout views to the new provider profile pages.

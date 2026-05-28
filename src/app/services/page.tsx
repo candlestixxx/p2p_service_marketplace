@@ -99,7 +99,7 @@ export default async function MarketplacePage({
                 <Card key={service.id} className="flex flex-col overflow-hidden transition-all hover:shadow-md">
                   <CardHeader className="p-4 pb-0">
                     <CardDescription className="font-semibold text-primary flex items-center justify-between">
-                      <span className="truncate mr-2">{service.provider.name || "Unknown Provider"}</span>
+                      <Link href={`/provider/${service.provider.id}`} className="truncate mr-2 hover:underline decoration-primary">{service.provider.name || "Unknown Provider"}</Link>
                       {service.provider.city && (
                         <span className="text-xs font-normal text-muted-foreground truncate shrink-0">
                           {service.provider.city}, {service.provider.state}

@@ -7,6 +7,7 @@ import { getProviderAvailabilityForService } from "@/actions/booking";
 import { createCheckoutSession } from "@/actions/payment";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { toast } from "sonner";
 import { format, addDays, startOfToday } from "date-fns";
 import { Star, ShieldCheck } from "lucide-react";
@@ -95,7 +96,7 @@ export default function BookServicePage() {
                     <ShieldCheck className="w-6 h-6 text-amber-500 shrink-0" />
                   )}
                 </div>
-                <CardDescription>{service.provider.name}</CardDescription>
+                <CardDescription><Link href={`/provider/${service.provider.id}`} className="hover:underline hover:text-primary transition-colors">{service.provider.name}</Link></CardDescription>
                 {service.provider.totalRatings > 0 && (
                 <div className="flex items-center gap-1 mt-1">
                   <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" />
