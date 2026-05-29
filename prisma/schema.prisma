@@ -36,6 +36,7 @@ model User {
   stripeConnectLinked Boolean @default(false)
   isPro               Boolean @default(false)
   stripeSubscriptionId String?
+  nylasGrantId         String?
   city String?
   state String?
   zip_code String?

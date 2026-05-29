@@ -107,3 +107,14 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 ## Final Feature (Admin Review Moderation)
 - Added `getAllReviews` and `deleteReview` actions to `src/actions/admin.ts`.
 - Integrated a new UI panel inside `/dashboard/admin` that surfaces all platform reviews and allows admins to permanently delete fraudulent or abusive comments.
+
+## Final Feature (Service Images)
+- Updated `prisma/schema.prisma` mapping `image` logic onto active service listings.
+- Improved the public discovery hub (`/services`), booking page (`/services/[id]/book`), and provider portfolio (`/provider/[id]`) to dynamically render the service images across all grids and layouts.
+
+## Completion Protocol
+This concludes the active autonomous session. The workspace builds properly and tests successfully.
+
+
+## Final Feature (Nylas Calendar Sync Scaffold)
+- Scaffolded the `nylasGrantId` in Prisma and the UI toggle in the Provider profile. The core `connectNylas()` action awaits real developer API keys to proceed.

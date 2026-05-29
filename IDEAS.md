@@ -3,7 +3,7 @@
 ## Advanced Calendar Sync (Google Calendar & Outlook)
 Integrating external calendars is the primary hurdle for scaling a two-sided marketplace. If providers manage their schedules in Google Calendar or Outlook, they will inevitably double-book if our platform relies solely on its internal Prisma `Availability` tables.
 
-### Proposed Architecture: Nylas API Integration
+### Proposed Architecture: Nylas API Integration [SCAFFOLDED IN UI]
 Rather than building separate OAuth 2.0 flows for Google, Microsoft, and Apple, the platform should integrate **Nylas** (or Cronofy).
 
 1. **Provider Onboarding Update:**

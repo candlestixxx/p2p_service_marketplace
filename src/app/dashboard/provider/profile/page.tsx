@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, CalendarSync } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProfile, getProvider } from "@/actions/provider";
 import { toggleProStatus } from "@/actions/pro";
+import { connectNylas, disconnectNylas } from "@/actions/calendar";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -33,6 +34,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isPro, setIsPro] = useState(false);
   const [togglingPro, setTogglingPro] = useState(false);
+  const [nylasGrantId, setNylasGrantId] = useState<string | null>(null);
+  const [togglingCalendar, setTogglingCalendar] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,6 +53,7 @@ export default function ProfilePage() {
       try {
         const user = await getProvider();
         setIsPro(user.isPro);
+        setNylasGrantId(user.nylasGrantId);
         form.reset({
           city: user.city || "",
           state: user.state || "",
@@ -84,6 +88,24 @@ export default function ProfilePage() {
      return <div className="p-8 text-center text-muted-foreground">Loading profile...</div>;
   }
 
+  const handleToggleCalendar = async () => {
+    setTogglingCalendar(true);
+    try {
+       if (nylasGrantId) {
+          await disconnectNylas();
+          setNylasGrantId(null);
+          toast.success("External calendar disconnected.");
+       } else {
+          await connectNylas();
+          // We won't set state directly here since it throws if keys are missing
+       }
+    } catch(e) {
+       toast.error((e as Error).message || "Failed to update calendar settings");
+    } finally {
+       setTogglingCalendar(false);
+    }
+  };
+
   const handleTogglePro = async () => {
     setTogglingPro(true);
     try {
@@ -99,6 +121,28 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Card>
+        <CardHeader className="pb-4">
+           <div className="flex items-center justify-between">
+             <div>
+               <CardTitle>Calendar Synchronization</CardTitle>
+               <CardDescription>Connect external calendars (Google, Outlook) to prevent double-booking.</CardDescription>
+             </div>
+             <CalendarSync className={`w-6 h-6 ${nylasGrantId ? "text-green-500" : "text-muted-foreground"}`} />
+           </div>
+        </CardHeader>
+        <CardContent>
+           <p className="text-sm text-muted-foreground mb-4">
+             {nylasGrantId
+               ? "Your external calendar is currently connected. Busy blocks will automatically hide availability from clients."
+               : "No external calendar connected. Clients may book appointments that conflict with your personal schedule."}
+           </p>
+           <Button variant={nylasGrantId ? "outline" : "default"} onClick={handleToggleCalendar} disabled={togglingCalendar}>
+             {togglingCalendar ? "Processing..." : nylasGrantId ? "Disconnect Calendar" : "Connect Google / Outlook"}
+           </Button>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="pb-4">
            <div className="flex items-center justify-between">
