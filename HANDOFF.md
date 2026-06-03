@@ -114,7 +114,5 @@ All files are cleanly structured using the App Router (`src/app`). Standard glob
 
 ## Completion Protocol
 This concludes the active autonomous session. The workspace builds properly and tests successfully.
-
-
 ## Final Feature (Nylas Calendar Sync Scaffold)
 - Scaffolded the `nylasGrantId` in Prisma and the UI toggle in the Provider profile. The core `connectNylas()` action awaits real developer API keys to proceed.
