@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.3] - Nylas Scaffold Implementations
+- **Integrations**: Fully scaffolded Nylas SDK connection inside `src/actions/calendar.ts`.
+- **Infrastructure**: Added `nylas` package to dependencies to continue integration buildout.
+
 ## [1.0.2] - Upstream Sync & Integrations
 - **Core Strategy**: Successfully executed upstream recursive sync.
 - **Merge Reconciliation**: Intelligently merged `origin/main` upstream features (such as `Nylas` external calendar scaffolding) directly into local feature branches.
