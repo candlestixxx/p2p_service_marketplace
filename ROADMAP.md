@@ -20,3 +20,8 @@
 * [x] Geo-location filtering with Google Maps API (Simplified to City/State string match)
 * [x] Advanced Calendar Sync (Google Calendar API, Outlook) -> Implemented via `.ics` export fallbacks. Live syncing deferred to Phase 4 (See IDEAS.md).
 * [x] Admin Moderation Dashboard
+
+## Phase 4: External Integrations & APIs
+* [ ] Complete Nylas External Calendar Sync implementation (Scaffolded).
+* [ ] Implement active external database backups and fallbacks.
+* [ ] Build out Stripe Webhook refund handling for cancelled appointments.
