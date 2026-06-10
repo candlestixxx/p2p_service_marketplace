@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.4] - Comprehensive Repo Sync & Integration Suite
+- **Core Sync**: Executed dual-direction intelligent merge engine, reconciling `main` and all local AI feature branches.
+- **Testing**: Built `__tests__/integration.test.ts` to programmatically validate repository health and turbopack build processes.
+
 ## [1.0.3] - Nylas Scaffold Implementations
 - **Integrations**: Fully scaffolded Nylas SDK connection inside `src/actions/calendar.ts`.
 - **Infrastructure**: Added `nylas` package to dependencies to continue integration buildout.
