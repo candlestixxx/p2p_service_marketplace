@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import Nylas from 'nylas';
 
 // In Nylas V3 Node.js SDK, signature validation can be done via verifyWebhookSignature
 // We need NYLAS_WEBHOOK_SECRET to do so.
