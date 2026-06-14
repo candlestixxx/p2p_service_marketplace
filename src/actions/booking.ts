@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import Nylas from "nylas";
 
 export async function getProviderAvailabilityForService(serviceId: string, dateStr: string) {
   const service = await prisma.service.findUnique({
@@ -55,6 +56,41 @@ export async function getProviderAvailabilityForService(serviceId: string, dateS
     }
   });
 
+  let nylasBusySlots: { startTime: Date; endTime: Date }[] = [];
+
+  if (service.provider.nylasGrantId && process.env.NYLAS_API_KEY) {
+    try {
+      const nylas = new Nylas({
+        apiKey: process.env.NYLAS_API_KEY,
+        apiUri: process.env.NYLAS_API_URI || "https://api.us.nylas.com",
+      });
+      const freeBusyResp = await nylas.calendars.getFreeBusy({
+        identifier: service.provider.nylasGrantId,
+        requestBody: {
+          startTime: Math.floor(startOfDay.getTime() / 1000),
+          endTime: Math.floor(endOfDay.getTime() / 1000),
+          emails: [service.provider.email],
+        },
+      });
+      if (freeBusyResp && freeBusyResp.data) {
+        for (const fbres of freeBusyResp.data) {
+          if (fbres.object === "free_busy" && fbres.timeSlots) {
+            for (const slot of fbres.timeSlots) {
+               if (slot.status === "busy") {
+                  nylasBusySlots.push({
+                     startTime: new Date(slot.startTime * 1000),
+                     endTime: new Date(slot.endTime * 1000),
+                  });
+               }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch Nylas free-busy:", e);
+    }
+  }
+
   const slots: { start: Date; end: Date }[] = [];
   const serviceDurationMs = service.duration_minutes * 60 * 1000;
   // Note: the buffer for the NEW appointment is also added
@@ -66,7 +102,7 @@ export async function getProviderAvailabilityForService(serviceId: string, dateS
     const currentSlotWithBufferEnd = new Date(currentSlotEnd.getTime() + newAppointmentBufferMs);
 
     // Check for overlap with existing appointments, factoring in the existing appointment's buffer
-    const hasOverlap = existingAppointments.some((apt: { start_time: Date; end_time: Date; service: { buffer_minutes: number } }) => {
+    const hasOverlapWithInternal = existingAppointments.some((apt: { start_time: Date; end_time: Date; service: { buffer_minutes: number } }) => {
       const aptBufferMs = apt.service.buffer_minutes * 60 * 1000;
       const aptEndWithBuffer = new Date(new Date(apt.end_time).getTime() + aptBufferMs);
 
@@ -77,7 +113,16 @@ export async function getProviderAvailabilityForService(serviceId: string, dateS
       );
     });
 
-    if (!hasOverlap) {
+    const hasOverlapWithNylas = nylasBusySlots.some((slot) => {
+       // Since these are external appointments, we don't have a buffer configured for them
+       return (
+         (currentSlotStart >= slot.startTime && currentSlotStart < slot.endTime) ||
+         (currentSlotWithBufferEnd > slot.startTime && currentSlotWithBufferEnd <= slot.endTime) ||
+         (currentSlotStart <= slot.startTime && currentSlotWithBufferEnd >= slot.endTime)
+       );
+    });
+
+    if (!hasOverlapWithInternal && !hasOverlapWithNylas) {
       slots.push({
         start: new Date(currentSlotStart),
         end: currentSlotEnd,
