@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     // Try signature validation using Node crypto manually since `req.text()` gives us the raw body payload.
-    const crypto = require("crypto");
+    const crypto = await import("crypto");
     const hmac = crypto.createHmac("sha256", process.env.NYLAS_WEBHOOK_SECRET);
     hmac.update(rawBody);
     const expectedSignature = hmac.digest("hex");

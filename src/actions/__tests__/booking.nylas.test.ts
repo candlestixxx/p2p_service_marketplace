@@ -2,7 +2,6 @@ import { TextEncoder, TextDecoder } from "util";
 Object.assign(global, { TextDecoder, TextEncoder });
 
 import { getProviderAvailabilityForService } from "../booking";
-import { prisma } from "../../lib/prisma";
 import Nylas from 'nylas';
 
 jest.mock("../../lib/prisma", () => {
@@ -50,6 +49,7 @@ describe("booking Nylas integration", () => {
    });
 
    it("should fetch free busy and subtract from slots", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (Nylas as any).mockImplementation(() => {
          return {
             calendars: {
@@ -71,6 +71,7 @@ describe("booking Nylas integration", () => {
    });
 
    it("should return empty slots when totally available", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (Nylas as any).mockImplementation(() => {
          return {
             calendars: {

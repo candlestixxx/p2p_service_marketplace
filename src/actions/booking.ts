@@ -56,7 +56,7 @@ export async function getProviderAvailabilityForService(serviceId: string, dateS
     }
   });
 
-  let nylasBusySlots: { startTime: Date; endTime: Date }[] = [];
+  const nylasBusySlots: { startTime: Date; endTime: Date }[] = [];
 
   if (service.provider.nylasGrantId && process.env.NYLAS_API_KEY) {
     try {
