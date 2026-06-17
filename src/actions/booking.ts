@@ -74,7 +74,7 @@ export async function getProviderAvailabilityForService(serviceId: string, dateS
       });
       if (freeBusyResp && freeBusyResp.data) {
         for (const fbres of freeBusyResp.data) {
-          if (fbres.object === "free_busy" && fbres.timeSlots) {
+          if (fbres.timeSlots) {
             for (const slot of fbres.timeSlots) {
                if (slot.status === "busy") {
                   nylasBusySlots.push({

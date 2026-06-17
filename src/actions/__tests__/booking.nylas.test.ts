@@ -55,7 +55,7 @@ describe("booking Nylas integration", () => {
             calendars: {
                getFreeBusy: jest.fn().mockResolvedValue({
                   data: [{
-                     object: "free_busy",
+                     email: "provider@example.com",
                      timeSlots: [{
                         status: "busy",
                         startTime: new Date("2023-01-01T09:15:00.000Z").getTime() / 1000,
