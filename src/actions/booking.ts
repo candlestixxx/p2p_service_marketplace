@@ -74,8 +74,10 @@ export async function getProviderAvailabilityForService(serviceId: string, dateS
       });
       if (freeBusyResp && freeBusyResp.data) {
         for (const fbres of freeBusyResp.data) {
-          if (fbres.timeSlots) {
-            for (const slot of fbres.timeSlots) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const slots = (fbres as any).timeSlots || (fbres as any).time_slots;
+          if (slots) {
+            for (const slot of slots) {
                if (slot.status === "busy") {
                   nylasBusySlots.push({
                      startTime: new Date(slot.startTime * 1000),
