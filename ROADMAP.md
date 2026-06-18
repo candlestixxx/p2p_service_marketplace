@@ -20,3 +20,7 @@
 * [x] Geo-location filtering with Google Maps API (Simplified to City/State string match)
 * [x] Advanced Calendar Sync (Google Calendar API, Outlook) -> Implemented via `.ics` export fallbacks. Live syncing deferred to Phase 4 (See IDEAS.md).
 * [x] Admin Moderation Dashboard
+
+## Phase 4: Integrations (Current Phase)
+* [x] Implement Nylas API Integration for real-time external calendar sync (free/busy lookup).
+* [x] Webhooks for real-time synchronization of event updates.
