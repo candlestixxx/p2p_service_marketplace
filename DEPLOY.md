@@ -1,5 +1,4 @@
 # DEPLOYMENT
-
 ## Local Development
 1. `npm install`
 2. Configure `.env` with required secrets: `DATABASE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `AUTH_SECRET`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`, and `RESEND_API_KEY`.
