@@ -5,6 +5,110 @@ import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { getClient } from "./booking";
 import { getProvider } from "./provider";
+import { paypalClient } from "@/lib/paypal";
+import { OrdersController, CheckoutPaymentIntent } from "@paypal/paypal-server-sdk";
+
+export async function createPayPalOrder(serviceId: string, slotStart: Date) {
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId },
+    include: { provider: true },
+  });
+
+  if (!service) return { success: false, message: "Service not found" };
+
+  const client = await getClient();
+  const endTime = new Date(slotStart.getTime() + service.duration_minutes * 60000);
+
+  // Buffer calculation
+  const endTimeWithBuffer = new Date(endTime.getTime() + service.buffer_minutes * 60000);
+  const startOfDay = new Date(slotStart);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const endOfDay = new Date(slotStart);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  const existingApts = await prisma.appointment.findMany({
+    where: {
+      providerId: service.providerId,
+      status: { not: "CANCELLED" },
+      start_time: { gte: startOfDay, lt: endOfDay },
+    },
+    include: { service: true }
+  });
+
+  const overlap = existingApts.some((apt) => {
+      const aptBufferMs = apt.service.buffer_minutes * 60000;
+      const aptEndWithBuffer = new Date(apt.end_time.getTime() + aptBufferMs);
+      return apt.start_time < endTimeWithBuffer && aptEndWithBuffer > slotStart;
+  });
+
+  if (overlap) {
+    return { success: false, message: "Time slot is no longer available." };
+  }
+
+  // Create PENDING appointment
+  const appointment = await prisma.appointment.create({
+    data: {
+      clientId: client.id,
+      providerId: service.providerId,
+      serviceId: service.id,
+      start_time: slotStart,
+      end_time: endTime,
+      status: "PENDING",
+    },
+  });
+
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
+
+  try {
+     const ordersController = new OrdersController(paypalClient);
+     const { body } = await ordersController.createOrder({
+        body: {
+            intent: CheckoutPaymentIntent.Capture,
+            purchaseUnits: [
+               {
+                   amount: {
+                       currencyCode: "USD",
+                       value: service.price.toString()
+                   },
+                   description: `${service.title} with ${service.provider.name}`
+               }
+            ],
+            paymentSource: {
+                paypal: {
+                   experienceContext: {
+                      returnUrl: `${baseUrl}/services/${serviceId}/success?paypal=true&appointmentId=${appointment.id}`,
+                      cancelUrl: `${baseUrl}/services/${serviceId}/book?canceled=true`
+                   }
+                }
+            }
+        }
+     });
+
+     const parsedBody = JSON.parse(body as string);
+
+     if (parsedBody.id) {
+         // Save the order ID to the payment intent ID for tracking
+         await prisma.appointment.update({
+            where: { id: appointment.id },
+            data: { paymentIntentId: parsedBody.id }
+         });
+
+         const approveLink = parsedBody.links?.find((link: { rel: string; href: string }) => link.rel === "payer-action");
+         if (approveLink) {
+             return { success: true, url: approveLink.href };
+         }
+     }
+
+     throw new Error("Failed to generate PayPal checkout link.");
+
+  } catch (err: unknown) {
+     await prisma.appointment.delete({ where: { id: appointment.id } });
+     return { success: false, message: (err as Error).message || "Failed to create PayPal order." };
+  }
+}
 
 export async function createCheckoutSession(serviceId: string, slotStart: Date) {
   const service = await prisma.service.findUnique({
