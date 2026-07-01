@@ -23,40 +23,42 @@ enum AppointmentStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      Role     @default(CLIENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  name                 String?
+  role                 Role      @default(CLIENT)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
   accounts             Account[]
   sessions             Session[]
-  password String?
-  stripeAccountId String?
-  stripeConnectLinked Boolean @default(false)
-  isPro               Boolean @default(false)
+  password             String?
+  stripeAccountId      String?
+  stripeConnectLinked  Boolean   @default(false)
+  isPro                Boolean   @default(false)
   stripeSubscriptionId String?
   nylasGrantId         String?
-  city String?
-  state String?
-  zip_code String?
-  image String?
-  portfolioUrls String[] @default([])
+  city                 String?
+  state                String?
+  zip_code             String?
+  image                String?
+  portfolioUrls        String[]  @default([])
 
   // Relations
   services             Service[]
   availabilities       Availability[]
   clientAppointments   Appointment[]  @relation("ClientAppointments")
   providerAppointments Appointment[]  @relation("ProviderAppointments")
-  clientReviews        Review[]      @relation("ClientReviews")
-  providerReviews      Review[]      @relation("ProviderReviews")
+  clientReviews        Review[]       @relation("ClientReviews")
+  providerReviews      Review[]       @relation("ProviderReviews")
+  messagesSent         Message[]      @relation("MessagesSent")
+  messagesReceived     Message[]      @relation("MessagesReceived")
 }
 
 model Service {
   id               String   @id @default(cuid())
   title            String
   description      String?
-  category         String? @default("Other")
+  category         String?  @default("Other")
   price            Float
   duration_minutes Int
   buffer_minutes   Int      @default(0)
@@ -71,9 +73,9 @@ model Service {
 
 model Availability {
   id          String   @id @default(cuid())
-  day_of_week Int      // 0 = Sunday, 1 = Monday, etc.
-  start_time  String   // e.g., "09:00"
-  end_time    String   // e.g., "17:00"
+  day_of_week Int // 0 = Sunday, 1 = Monday, etc.
+  start_time  String // e.g., "09:00"
+  end_time    String // e.g., "17:00"
   providerId  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -83,37 +85,38 @@ model Availability {
 }
 
 model Appointment {
-  id         String            @id @default(cuid())
-  clientId   String
-  providerId String
-  serviceId  String
-  start_time DateTime
-  end_time   DateTime
-  status     AppointmentStatus @default(PENDING)
+  id              String            @id @default(cuid())
+  clientId        String
+  providerId      String
+  serviceId       String
+  start_time      DateTime
+  end_time        DateTime
+  status          AppointmentStatus @default(PENDING)
   paymentIntentId String?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   // Relations
-  client   User    @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
-  provider User    @relation("ProviderAppointments", fields: [providerId], references: [id], onDelete: Cascade)
-  service  Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  client   User      @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+  provider User      @relation("ProviderAppointments", fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   review   Review?
+  messages Message[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -137,18 +140,35 @@ model VerificationToken {
 }
 
 model Review {
-  id            String      @id @default(cuid())
-  rating        Int
-  comment       String?     @db.Text
-  createdAt     DateTime    @default(now())
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
 
   // Relations
   appointmentId String      @unique
   appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
 
-  clientId      String
-  client        User        @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
+  client   User   @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
 
-  providerId    String
-  provider      User        @relation("ProviderReviews", fields: [providerId], references: [id], onDelete: Cascade)
+  providerId String
+  provider   User   @relation("ProviderReviews", fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  // Relations
+  senderId String
+  sender   User   @relation("MessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User   @relation("MessagesReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  // Optional: Link to a specific appointment context
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
 }

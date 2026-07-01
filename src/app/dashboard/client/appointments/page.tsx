@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Appointment, Service, User, Review } from "@prisma/client";
 import { toast } from "sonner";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, MessageCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import Link from "next/link";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -127,6 +128,13 @@ export default function ClientAppointmentsPage() {
                         </Button>
                       </div>
                     )}
+                    <div className="flex gap-2">
+                       <Button variant="secondary" size="sm" asChild>
+                          <Link href={`/dashboard/messages?contactId=${apt.providerId}`}>
+                             <MessageCircle className="w-4 h-4 mr-2" /> Message Provider
+                          </Link>
+                       </Button>
+                    </div>
                     {canReview && (
                       <Dialog open={reviewApptId === apt.id} onOpenChange={(open) => !open && setReviewApptId(null)}>
                         <DialogTrigger asChild>

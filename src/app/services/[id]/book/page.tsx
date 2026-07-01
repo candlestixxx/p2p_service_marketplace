@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { getServiceDetails } from "@/actions/marketplace";
 import { getProviderAvailabilityForService } from "@/actions/booking";
-import { createCheckoutSession } from "@/actions/payment";
+import { createCheckoutSession, createPayPalOrder } from "@/actions/payment";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -24,6 +24,7 @@ export default function BookServicePage() {
   const [availableSlots, setAvailableSlots] = useState<{start: Date, end: Date}[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [booking, setBooking] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"STRIPE" | "PAYPAL">("STRIPE");
 
   useEffect(() => {
     if (searchParams.get("success")) {
@@ -62,7 +63,13 @@ export default function BookServicePage() {
   const handleBook = async (slotStart: Date) => {
     setBooking(true);
     try {
-      const res = await createCheckoutSession(id, slotStart);
+      let res;
+      if (paymentMethod === "STRIPE") {
+         res = await createCheckoutSession(id, slotStart);
+      } else {
+         res = await createPayPalOrder(id, slotStart);
+      }
+
       if (res.success && res.url) {
         window.location.href = res.url;
       } else {
@@ -187,6 +194,24 @@ export default function BookServicePage() {
               </div>
 
               <div>
+                <h3 className="font-medium mb-4">Payment Method</h3>
+                <div className="flex gap-4 mb-6">
+                   <Button
+                      variant={paymentMethod === "STRIPE" ? "default" : "outline"}
+                      onClick={() => setPaymentMethod("STRIPE")}
+                      className="flex-1"
+                   >
+                       Pay with Card
+                   </Button>
+                   <Button
+                      variant={paymentMethod === "PAYPAL" ? "default" : "outline"}
+                      onClick={() => setPaymentMethod("PAYPAL")}
+                      className="flex-1 bg-[#0070ba] hover:bg-[#003087] text-white border-0"
+                   >
+                       Pay with PayPal
+                   </Button>
+                </div>
+
                 <h3 className="font-medium mb-4">Available Times on {format(selectedDate, 'MMMM d, yyyy')}</h3>
                 {loadingSlots ? (
                   <p className="text-muted-foreground text-sm">Loading slots...</p>

@@ -32,6 +32,12 @@ export default async function ClientLayout({
           >
             Appointments
           </Link>
+          <Link
+            href="/dashboard/messages"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Messages
+          </Link>
         </nav>
         <div className="ml-auto flex items-center gap-4">
           <Link href="/services" className="text-sm font-medium hover:underline underline-offset-4">

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { removeServiceFromAlgolia } from "@/lib/algolia";
 
 async function checkAdmin() {
   const session = await auth();
@@ -42,6 +43,7 @@ export async function deleteService(id: string) {
   await prisma.service.delete({
     where: { id }
   });
+  await removeServiceFromAlgolia(id);
   revalidatePath("/dashboard/admin");
   revalidatePath("/services");
 }

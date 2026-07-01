@@ -41,11 +41,19 @@ export async function POST(req: Request) {
         console.log(`Nylas event ${data.type} for grant: ${grantId}`);
         // Optionally update something in DB or revalidate paths
 
+
+
+
+
         const user = await prisma.user.findFirst({
            where: {
               nylasGrantId: grantId,
            }
         });
+
+
+
+
 
         if (user) {
            revalidatePath("/dashboard/client");
