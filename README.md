@@ -1,4 +1,4 @@
-# ServiceHub (v1.1.24)
+# ServiceHub (v1.1.34)
 
 ServiceHub is a comprehensive "Uber for Services" two-sided marketplace. It connects Service Providers (supply) with Clients (demand) using a highly robust architecture built on Next.js 15, Prisma, PostgreSQL, NextAuth, Algolia, and Stripe Connect.
 
