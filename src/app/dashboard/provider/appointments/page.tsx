@@ -5,8 +5,9 @@ import { getProviderAppointments, updateAppointmentStatus } from "@/actions/prov
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, MessageCircle } from "lucide-react";
 import { Appointment, Service, User } from "@prisma/client";
+import Link from "next/link";
 import { toast } from "sonner";
 
 type AppointmentWithDetails = Appointment & { service: Service, client: User };
@@ -117,6 +118,13 @@ export default function ProviderAppointmentsPage() {
                       </Button>
                     </div>
                   )}
+                  <div className="flex gap-2">
+                     <Button variant="secondary" size="sm" asChild>
+                        <Link href={`/dashboard/messages?contactId=${apt.clientId}`}>
+                           <MessageCircle className="w-4 h-4 mr-2" /> Message Client
+                        </Link>
+                     </Button>
+                  </div>
                 </div>
               </div>
             ))}
