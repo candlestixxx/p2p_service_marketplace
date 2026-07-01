@@ -7,10 +7,13 @@ import { format } from "date-fns";
 
 export default async function BookingSuccessPage({
   params,
+  searchParams
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ paypal?: string, appointmentId?: string }>;
 }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
   const service = await getServiceDetails(resolvedParams.id);
 
   if (!service) {
@@ -26,7 +29,7 @@ export default async function BookingSuccessPage({
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight">Booking Confirmed!</CardTitle>
           <CardDescription className="text-base mt-2">
-            Your payment was successful and your appointment is scheduled.
+            {resolvedSearch.paypal ? "Your PayPal order is processing. Check your email for confirmation." : "Your payment was successful and your appointment is scheduled."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">

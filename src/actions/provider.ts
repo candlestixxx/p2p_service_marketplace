@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { stripe } from "@/lib/stripe";
+import { syncServiceToAlgolia, removeServiceFromAlgolia } from "@/lib/algolia";
 
 export async function getProvider() {
   const session = await auth();
@@ -32,12 +33,15 @@ export async function addService(data: {
 }) {
   const provider = await getProvider();
 
-  await prisma.service.create({
+  const newService = await prisma.service.create({
     data: {
       ...data,
       providerId: provider.id,
     },
+    include: { provider: true }
   });
+
+  await syncServiceToAlgolia(newService);
 
   revalidatePath("/dashboard/provider/services");
 }
@@ -176,6 +180,8 @@ export async function deleteProviderService(serviceId: string) {
   await prisma.service.delete({
     where: { id: serviceId }
   });
+
+  await removeServiceFromAlgolia(serviceId);
 
   revalidatePath("/dashboard/provider/services");
   revalidatePath("/services");
