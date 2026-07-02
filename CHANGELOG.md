@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.35] - Tooltip UI Enhancements
+- **Tooltips**: Added shadcn Tooltip component with explanations on dashboard analytics cards.
+- **UI Explanations**: Admin, Client, and Provider dashboards now include contextual help text.
+
 ## [1.1.34] - Final Expansion: PayPal, Messaging & Algolia
 - **PayPal Integration**: Added secondary checkout route with PayPal Server SDK for dual payment options (Stripe/PayPal).
 - **PayPal Webhooks**: Secure endpoint at `/api/webhook/paypal` for `CHECKOUT.ORDER.APPROVED` capture and appointment confirmation.

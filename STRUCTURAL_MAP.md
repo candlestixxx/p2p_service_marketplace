@@ -1,4 +1,4 @@
-# Structural Map — ServiceHub Marketplace (v1.1.34)
+# Structural Map — ServiceHub Marketplace (v1.1.35)
 
 ## Overview
 This document maps all source modules, their locations, and key architectural relationships.
@@ -83,7 +83,7 @@ This repository has no git submodules. All code is contained directly in this re
 ## Active Branches
 | Branch | Status |
 |--------|--------|
-| main | Latest (v1.1.34) |
+| main | Latest (v1.1.35) |
 | jules-8999598513845091996-64c48c3e | Reverse-merged from main |
 | jules-11618208320087535291-bedf8744 | Reverse-merged from main |
 | servicehub-marketplace-mvp-11017081671621905486 | Reverse-merged from main |
