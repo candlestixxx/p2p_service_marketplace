@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { auth } from "@/auth";
 import { removeServiceFromAlgolia } from "@/lib/algolia";
 
@@ -48,27 +48,34 @@ export async function deleteService(id: string) {
   revalidatePath("/services");
 }
 
+const getCachedAnalytics = unstable_cache(
+  async () => {
+    const [totalUsers, totalServices, confirmedAppointments] = await Promise.all([
+      prisma.user.count(),
+      prisma.service.count(),
+      prisma.appointment.findMany({
+         where: { status: 'CONFIRMED' },
+         include: { service: true }
+      })
+   ]);
+
+   const totalGMV = confirmedAppointments.reduce((acc, curr) => acc + curr.service.price, 0);
+   const platformFees = totalGMV * 0.10;
+
+   return {
+     totalUsers,
+     totalServices,
+     totalGMV,
+     platformFees
+   };
+  },
+  ['admin-platform-analytics'],
+  { revalidate: 3600 } // Cache for 1 hour
+);
+
 export async function getAdminPlatformAnalytics() {
   await checkAdmin();
-
-  const [totalUsers, totalServices, confirmedAppointments] = await Promise.all([
-     prisma.user.count(),
-     prisma.service.count(),
-     prisma.appointment.findMany({
-        where: { status: 'CONFIRMED' },
-        include: { service: true }
-     })
-  ]);
-
-  const totalGMV = confirmedAppointments.reduce((acc, curr) => acc + curr.service.price, 0);
-  const platformFees = totalGMV * 0.10; // 10% fee hardcoded in checkout logic
-
-  return {
-    totalUsers,
-    totalServices,
-    totalGMV,
-    platformFees
-  };
+  return getCachedAnalytics();
 }
 
 export async function getAllReviews() {
