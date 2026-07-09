@@ -1,4 +1,4 @@
-# ServiceHub (v1.1.24)
+# ServiceHub (v1.1.36)
 
 ServiceHub is a comprehensive "Uber for Services" two-sided marketplace. It connects Service Providers (supply) with Clients (demand) using a highly robust architecture built on Next.js 15, Prisma, PostgreSQL, NextAuth, Algolia, and Stripe Connect.
 
@@ -9,10 +9,10 @@ ServiceHub is a comprehensive "Uber for Services" two-sided marketplace. It conn
 - **Advanced Direct Messaging**: Native in-app chat utilizing 15-second polling intervals allows direct, context-aware communication between clients and providers.
 - **The Booking Engine**: Automatically parses a provider's custom schedule, calculates 30-minute time slots, and cross-references existing bookings and prep-buffers to calculate real-time available slots, mathematically preventing double-booking overlaps.
 - **External Calendar Sync**: Deep integration with the **Nylas V3 API**. Provider Google/Outlook calendars are checked dynamically during booking slot generation via `getFreeBusy` to definitively prevent platform-external double bookings. Secure webhooks (`/api/webhook/nylas`) automatically revalidate UI paths.
-- **Escrow Payments & Automated Payouts**: Integrated with Stripe Connect. Payments are captured up-front upon booking via **Destination Charges**, routing platform fees to the main account and immediately transferring the balance to the Provider's express dashboard.
+- **Escrow Payments & Automated Payouts**: Integrated with Stripe Connect and PayPal REST APIs. Payments are captured up-front upon booking via **Destination Charges**, routing platform fees to the main account and immediately transferring the balance to the Provider's express dashboard.
 - **Pro Subscriptions**: Standard providers pay a 10% platform fee per booking. Providers can upgrade to "PRO" to waive the fee entirely and earn distinct verification badges.
-- **Admin Moderation**: Highly secure `ADMIN` role dashboard tracking Platform Lifetime GMV, active users, and providing 1-click removal of malicious service listings and reviews.
-- **Notifications**: Integrated Twilio SMS and Resend Email SDKs for instant appointment booking and cancellation receipts.
+- **Admin Moderation & Analytics**: Highly secure `ADMIN` role dashboard tracking Platform Lifetime GMV, active users, and providing 1-click removal of malicious service listings and reviews. Employs `unstable_cache` for heavy metric tracking. Vercel Web Analytics injected at the root layout.
+- **Notifications & Crons**: Integrated Twilio SMS and Resend Email SDKs for instant appointment booking, cancellations, and 24-hour Vercel Cron-triggered automated reminders (`/api/cron/reminders`).
 
 ## Repository Governance
 - **Automated CI/CD**: Pushes to `main` must pass rigorous continuous integration pipelines (`.github/workflows/test.yml`), strictly checking TypeScript (`npx tsc --noEmit`) and Jest unit/integration tests before deployment.
