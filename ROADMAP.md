@@ -32,3 +32,7 @@
 * [x] Integrate Vercel Analytics for user flow tracking.
 * [x] Implement an automated Cron Job / Queue system for email reminders (e.g., "Your appointment is in 24 hours").
 * [x] Advanced Server-Side Caching natively via Next.js `unstable_cache` for heavy database queries.
+
+## Phase 6: Post-Launch Value Adds (Current Phase)
+* [ ] Automated PDF Invoice generation for B2B/tax compliance.
+* [ ] Dynamic interactive maps embedded into service pages.

@@ -1,11 +1,8 @@
 # TODO
 
 ## Immediate Fixes
-* [x] Review `src/actions/admin.ts` to ensure the `getAdminPlatformAnalytics` strictly memoizes or caches the results, as this queries all appointments on load.
+* [ ] None pending. All tests passing and types are strictly clean.
 
 ## Short-term Features
-* [x] Implement an automated Cron Job / Serverless endpoint that checks for appointments happening in the next 24 hours and triggers a reminder SMS/Email.
-* [x] Integrate generic page view analytics (Vercel Web Analytics).
-
-## Notes
-Everything tracked in the immediate roadmap has been resolved.
+* [ ] Implement an automated PDF Invoice generator that emails receipts to clients upon successful Stripe/PayPal capture.
+* [ ] Implement a built-in interactive Google Maps iframe on the Service detail page using the provider's `city` and `state`.
