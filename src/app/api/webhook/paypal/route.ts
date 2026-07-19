@@ -32,13 +32,16 @@ export async function POST(req: Request) {
                 data: { status: "CONFIRMED" }
             });
 
-            // Trigger Notifications
+            // Trigger Notifications with PDF Attachment
             await sendBookingConfirmationNotifications(
                 appointment.client.email,
+                appointment.client.name || "Client",
                 "555-0199",
                 appointment.service.title,
                 appointment.provider.name || "Provider",
-                appointment.start_time
+                appointment.service.price,
+                appointment.start_time,
+                appointment.id
             );
         }
      }

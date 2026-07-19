@@ -34,10 +34,13 @@ export async function GET(req: Request) {
          // Using the existing notification module (you could create a distinct "sendReminderNotification" module instead)
          await sendBookingConfirmationNotifications(
              apt.client.email,
+             apt.client.name || "Client",
              "555-0199",
              `REMINDER: ${apt.service.title}`,
              apt.provider.name || "Provider",
-             apt.start_time
+             apt.service.price,
+             apt.start_time,
+             apt.id
          );
          sentCount++;
      }

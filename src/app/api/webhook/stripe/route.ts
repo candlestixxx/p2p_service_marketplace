@@ -43,13 +43,16 @@ export async function POST(req: Request) {
         }
       });
 
-      // Send Mock SMS & Email Notification
+      // Send Mock SMS & Email Notification with PDF Attachment
       await sendBookingConfirmationNotifications(
         updatedApt.client.email,
+        updatedApt.client.name || "Client",
         "555-0199", // mock client phone number
         updatedApt.service.title,
         updatedApt.provider.name || "Provider",
-        updatedApt.start_time
+        updatedApt.service.price,
+        updatedApt.start_time,
+        updatedApt.id
       );
     }
   }

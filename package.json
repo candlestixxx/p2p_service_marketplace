@@ -29,6 +29,7 @@
     "algoliasearch": "^5.55.1",
     "bcryptjs": "^3.0.3",
     "date-fns": "^4.3.0",
+    "jspdf": "^4.2.1",
     "next": "15.5.18",
     "next-auth": "^5.0.0-beta.31",
     "next-themes": "^0.4.6",
